@@ -1,0 +1,2 @@
+end: "sudo /opt/vyatta/sbin/dhcpd-config.pl --out=/opt/vyatta/etc/dhcpd.conf --init='/opt/vyatta/sbin/dhcpd.init' 1>&2"
+help: "DHCP configuration"

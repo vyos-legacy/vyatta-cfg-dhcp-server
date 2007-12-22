@@ -1,0 +1,2 @@
+vyatta-cfg-dhcp-server: file-in-unusual-dir
+vyatta-cfg-dhcp-server: dir-or-file-in-opt

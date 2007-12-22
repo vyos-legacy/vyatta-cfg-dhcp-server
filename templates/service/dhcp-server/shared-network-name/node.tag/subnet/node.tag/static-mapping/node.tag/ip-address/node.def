@@ -1,0 +1,2 @@
+type: ipv4
+help: "Assign static ip mapping to address"

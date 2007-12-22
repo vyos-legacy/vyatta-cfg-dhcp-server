@@ -1,0 +1,6 @@
+The Debian Package vyatta-cfg-dhcp-server
+----------------------------
+
+This package has the Vyatta DHCP-server-level configuration templates and scripts.
+
+ -- Marat Nepomnyashy <marat@vyatta.com>  2007-12-19

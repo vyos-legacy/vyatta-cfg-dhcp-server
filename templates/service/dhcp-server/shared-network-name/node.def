@@ -1,0 +1,4 @@
+tag:
+type: txt
+help: "Configure DHCP shared network"
+syntax: pattern $(@) "^[-_a-zA-Z0-9.]+$" ; "invalid DHCP pool name \"$(@)\""

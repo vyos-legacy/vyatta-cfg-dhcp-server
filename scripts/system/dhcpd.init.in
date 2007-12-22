@@ -1,0 +1,91 @@
+#!/bin/sh
+
+touch /var/log/dhcpd.leases
+CONFIGFILE=@SYSCONFDIR@/dhcpd.conf
+PIDFILE=/var/run/dhcpd.pid
+
+start() {
+	echo -n "Starting dhcpd:  "
+	# progress_indicator "start" 
+	OUTPUT=`start-stop-daemon --start --make-pidfile --pidfile $PIDFILE -b --exec @BINDIR@/dhcpd \
+	-- -f -pf /var/run/dhcpd-unused.pid -cf $CONFIGFILE -lf /var/log/dhcpd.leases 2>&1`
+	# progress_indicator "stop"
+	PID=`cat $PIDFILE 2>/dev/null`
+	if [ -d "/proc/$PID" ]; then
+	  echo "OK"
+	else
+	  if [ $OUTPUT == ""]; then
+	    # this can happen under high load due to some sort of a race condition
+	    echo "Attempting start again..."
+	    sleep 1
+	    start
+	  else
+	    echo $OUTPUT
+	    echo "ERR"
+	    exit 1
+	  fi
+	fi
+}
+
+stop() {
+	echo -n "Stopping dhcpd:  "
+	# progress_indicator "start"
+	
+	if [ -f "$PIDFILE" ]; then
+	  PID=`cat $PIDFILE` 
+	  if [ -n "$PID" ]; then 
+	    OUTPUT=`start-stop-daemon -q --stop --pidfile $PIDFILE 2>&1`
+
+# Commenting out verification loop for now.  Process goes into zombie state only on
+# system startup.  This causes a loop greater that 20 seconds which forces rtrmgr
+# to commit suicide.	    
+#	    while [ -d "/proc/$PID" ]; do
+#	      sleep 1
+#	    done
+	  fi
+	  rm -f $PIDFILE
+	fi
+	
+	# progress_indicator "stop"
+	echo "OK"
+}
+
+restart () {
+	if [ -f "$PIDFILE" ]; then 
+	  PID=`cat $PIDFILE`
+	fi
+
+        if [ -n "$PID" ] && [ -d "/proc/$PID" ]; then
+          echo -n "Restarting dhcpd:  "
+	  # progress_indicator "start"
+	  OUTPUT=`kill -HUP $PID`
+	  # progress_indicator "stop"
+	  echo "OK"
+	else
+ 	  start
+        fi
+}
+
+case "$1" in
+	start)
+		start
+		;;
+	stop)
+		stop
+		;;
+	restart)
+		stop
+		start
+		# note I am disabling restart because no sig will cause dnsmasq to re-read it's config file.
+		# this is not good since I think it loses it's cache file on complete restart.
+		# maybe we can fix this when we shift away from dnsmasq.  Hence I leave the original code
+		# in this file
+		# restart
+		;;
+	*)
+		echo "usage: $0 {start|stop|restart} configfile interface"
+		exit 1
+		;;
+esac
+
+exit 0

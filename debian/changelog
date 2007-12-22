@@ -1,0 +1,5 @@
+vyatta-cfg-dhcp-server (0.1) unstable; urgency=low
+
+  * Ported to vyatta-cfg-dhcp-server
+
+ -- Marat Nepomnyashy <marat@vyatta.com>  Wed, 19 Dec 2007 15:40:00 -0700
