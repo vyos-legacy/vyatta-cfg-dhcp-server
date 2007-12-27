@@ -1,13 +1,13 @@
 #!/bin/sh
 
 touch /var/log/dhcpd.leases
-CONFIGFILE=@SYSCONFDIR@/dhcpd.conf
+CONFIGFILE=/opt/vyatta/etc/dhcpd.conf
 PIDFILE=/var/run/dhcpd.pid
 
 start() {
 	echo -n "Starting dhcpd:  "
 	# progress_indicator "start" 
-	OUTPUT=`start-stop-daemon --start --make-pidfile --pidfile $PIDFILE -b --exec @BINDIR@/dhcpd \
+	OUTPUT=`start-stop-daemon --start --make-pidfile --pidfile $PIDFILE -b --exec /usr/sbin/dhcpd3 \
 	-- -f -pf /var/run/dhcpd-unused.pid -cf $CONFIGFILE -lf /var/log/dhcpd.leases 2>&1`
 	# progress_indicator "stop"
 	PID=`cat $PIDFILE 2>/dev/null`

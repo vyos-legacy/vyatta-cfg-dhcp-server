@@ -21,8 +21,7 @@ AC_ARG_ENABLE([nostrip],
 	[NOSTRIP=-nostrip], [NOSTRIP=])
 
 AC_CONFIG_FILES(
-  [Makefile]
-  [scripts/system/dhcpd.init])
+  [Makefile])
 
 AC_SUBST(NOSTRIP)
 
