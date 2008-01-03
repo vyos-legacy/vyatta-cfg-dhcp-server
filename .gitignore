@@ -8,3 +8,7 @@ config.log
 config.status
 config.sub
 debian/vyatta-cfg-dhcp-server
+debian/files
+config
+configure
+INSTALL
