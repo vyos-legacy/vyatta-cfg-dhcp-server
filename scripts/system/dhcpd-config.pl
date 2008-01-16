@@ -163,14 +163,23 @@ if ($vcDHCP->exists('.')) {
 						my @static_mapping = $vcDHCP->listNodes("$name subnet $subnet static-mapping");
 						foreach my $static_mapping (@static_mapping) {
 							my $ip_address = $vcDHCP->returnValue("$name subnet $subnet static-mapping $static_mapping ip-address");
-							my $naipIP = new NetAddr::IP($ip_address);
-							if (!$naipIP->within($naipNetwork)) {
-								print stderr "DHCP server configuration error.  Static DHCP lease ip '$ip_address' is outside of the DHCP lease network '$subnet' under shared network '$name'.\n";
+							if (!defined($ip_address) || $ip_address eq '') {
+								print stderr "DHCP server configuration error.  No static DHCP lease ip address specified for static mapping '$static_mapping' under shared network name '$name'.\n";
+								$error = 1;
+							} else {
+								my $naipIP = new NetAddr::IP($ip_address);
+								if (!$naipIP->within($naipNetwork)) {
+									print stderr "DHCP server configuration error.  Static DHCP lease ip '$ip_address' under static mapping '$static_mapping' under shared network name '$name' is outside of the DHCP lease network '$subnet'.\n";
+									$error = 1;
+								}
+							}
+		
+							my $mac_address = $vcDHCP->returnValue("$name subnet $subnet static-mapping $static_mapping mac-address");
+							if (!defined($mac_address) || $mac_address eq '') {
+								print stderr "DHCP server configuration error.  No static DHCP lease mac address specified for static mapping '$static_mapping' under shared network name '$name'.\n";
 								$error = 1;
 							}
-	
-							my $mac_address = $vcDHCP->returnValue("$name subnet $subnet static-mapping $static_mapping mac-address");
-							if (($ip_address ne '') && ($mac_address ne '')) {
+							if (defined($ip_address) && $ip_address ne '' && defined($mac_address) && $mac_address ne '') {
 								$genout .=  "\t\thost $ip_address {\n";
 								$genout .=  "\t\t\tfixed-address $ip_address;\n";
 								$genout .=  "\t\t\thardware ethernet $mac_address;\n";
