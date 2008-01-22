@@ -1,36 +1,28 @@
 #!/bin/sh
 
+. /lib/lsb/init-functions
+
 touch /var/log/dhcpd.leases
 CONFIGFILE=/opt/vyatta/etc/dhcpd.conf
 PIDFILE=/var/run/dhcpd.pid
 
 start() {
-	echo -n "Starting dhcpd:  "
-	# progress_indicator "start" 
 	OUTPUT=`start-stop-daemon --start --make-pidfile --pidfile $PIDFILE -b --exec /usr/sbin/dhcpd3 \
 	-- -f -pf /var/run/dhcpd-unused.pid -cf $CONFIGFILE -lf /var/log/dhcpd.leases 2>&1`
-	# progress_indicator "stop"
 	PID=`cat $PIDFILE 2>/dev/null`
-	if [ -d "/proc/$PID" ]; then
-	  echo "OK"
-	else
-	  if [ $OUTPUT == ""]; then
+	if [ ! -d "/proc/$PID" ]; then
+	  if [ "$OUTPUT" == ""]; then
 	    # this can happen under high load due to some sort of a race condition
-	    echo "Attempting start again..."
 	    sleep 1
 	    start
 	  else
-	    echo $OUTPUT
-	    echo "ERR"
+	    log_failure_msg "$OUTPUT"
 	    exit 1
 	  fi
 	fi
 }
 
 stop() {
-	echo -n "Stopping dhcpd:  "
-	# progress_indicator "start"
-	
 	if [ -f "$PIDFILE" ]; then
 	  PID=`cat $PIDFILE` 
 	  if [ -n "$PID" ]; then 
@@ -46,8 +38,6 @@ stop() {
 	  rm -f $PIDFILE
 	fi
 	
-	# progress_indicator "stop"
-	echo "OK"
 }
 
 restart () {
@@ -56,11 +46,7 @@ restart () {
 	fi
 
         if [ -n "$PID" ] && [ -d "/proc/$PID" ]; then
-          echo -n "Restarting dhcpd:  "
-	  # progress_indicator "start"
 	  OUTPUT=`kill -HUP $PID`
-	  # progress_indicator "stop"
-	  echo "OK"
 	else
  	  start
         fi
@@ -83,7 +69,7 @@ case "$1" in
 		# restart
 		;;
 	*)
-		echo "usage: $0 {start|stop|restart} configfile interface"
+		log_failure_msg "usage: $0 {start|stop|restart} configfile interface"
 		exit 1
 		;;
 esac
