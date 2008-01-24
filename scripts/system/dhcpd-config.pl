@@ -80,7 +80,7 @@ if ($vcDHCP->exists('.')) {
 
 							my @vifs = $vcIE->listNodes("$eth vif");
 							foreach my $vif (@vifs) {
-								my @vif_addresses = $vcIE->listNodes("$eth vif $vif address");
+								my @vif_addresses = $vcIE->returnValues("$eth vif $vif address");
 								foreach my $vif_address (@vif_addresses) {
 									if (doCheckIfAddressPLInsideNetwork($vif_address, $naipNetwork)) {
 										$totalSubnetsMatched++;
