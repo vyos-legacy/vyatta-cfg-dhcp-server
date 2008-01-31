@@ -1,5 +1,5 @@
 type:  txt 
 default:  "disable"
-help: "Enable/disable authoritative"
-syntax: ($(@) == "disable" || $(@) == "enable" ) ; \
-"invalid authoritative $(@)"
+help: Enable/disable authoritative
+syntax:expression: ($VAR(@) == "disable" || $VAR(@) == "enable" ) ; \
+"invalid authoritative $VAR(@)"
