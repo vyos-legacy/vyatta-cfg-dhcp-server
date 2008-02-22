@@ -35,8 +35,21 @@ $genout .=  "# using 'new config' directory:     $vcDHCP->{_new_config_dir_base}
 
 my @names;
 
+my $disabled = 0;
+
 $vcDHCP->setLevel('service dhcp-server');
 if ($vcDHCP->exists('.')) {
+
+	my $disabled_val = $vcDHCP->returnValue('disabled');
+	if (defined($disabled_val) && $disabled_val eq 'true') {
+		my $msg = "Warning:  DHCP server will be deactivated because 'service dhcp-server disabled' is set to 'true'.\n";
+		print stderr $msg;
+		$disabled = 1;
+		$genout .=  "\n";
+		$genout .=  '# ' . $msg;
+		$genout .=  "\n";
+	}
+
 	# The ISC DHCPD server version V3.0.3 refuses to start without the 'ddns-update-style' parameter.
 	# The book 'The DHCP Handbook' ISBN 0-672-32327-3 recommends the 'interim' setting on page 403.
 	$genout .=  "ddns-update-style interim;\n\n";
@@ -221,7 +234,7 @@ if ($output ne undef) {
 }
 
 if ($init ne '') {
-	if (@names == 0) {
+	if (@names == 0 || $disabled) {
 		exec "$init stop";
 	} else {
 		exec "$init restart";
