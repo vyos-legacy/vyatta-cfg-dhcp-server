@@ -7,11 +7,16 @@ CONFIGFILE=/opt/vyatta/etc/dhcpd.conf
 PIDFILE=/var/run/dhcpd.pid
 
 start() {
+	if [ ! -f "$CONFIGFILE" ]; then
+	  log_failure_msg "Cannot start the DHCP server because configuration file $CONFIGFILE is absent."
+	  exit 1
+	fi
+
 	OUTPUT=`start-stop-daemon --start --make-pidfile --pidfile $PIDFILE -b --exec /usr/sbin/dhcpd3 \
 	-- -f -pf /var/run/dhcpd-unused.pid -cf $CONFIGFILE -lf /var/log/dhcpd.leases 2>&1`
 	PID=`cat $PIDFILE 2>/dev/null`
 	if [ ! -d "/proc/$PID" ]; then
-	  if [ "$OUTPUT" == ""]; then
+	  if [ "$OUTPUT" == "" ]; then
 	    # this can happen under high load due to some sort of a race condition
 	    sleep 1
 	    start
