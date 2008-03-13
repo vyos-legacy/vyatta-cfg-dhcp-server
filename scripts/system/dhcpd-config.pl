@@ -200,9 +200,20 @@ if ($vcDHCP->exists('.')) {
 							}
 						}
 	
-						my $wins_server = $vcDHCP->returnValue("$name subnet $subnet wins-server");
-						if ($wins_server ne '') {
-							$genout .=  "\t\toption netbios-name-servers $wins_server;\n";
+						my @wins_servers = $vcDHCP->returnValues("$name subnet $subnet wins-server");
+						if (@wins_servers > 0) {
+							$genout .=  "\t\toption netbios-name-servers ";
+							my $num_netbios = 0;
+							foreach my $wins_server (@wins_servers) {
+								if ($wins_server ne '') {
+									if ($num_netbios > 0) {
+										$genout .=  ', ';
+									}
+									$genout .=  "$wins_server";
+									$num_netbios++;
+								}
+							}
+							$genout .=  ";\n";
 						}
 						$genout .=  "\t}\n";
 					}
