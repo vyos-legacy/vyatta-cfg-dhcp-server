@@ -170,6 +170,10 @@ if ($vcDHCP->exists('.')) {
 								print stderr "DHCP server configuration error.  Stop DHCP lease ip '$stop' is outside of the DHCP lease network '$subnet' under shared network '$name'.\n";
 								$error = 1;
 							    }
+							    if ($naipStop < $naipStart) {
+			                                        print stderr "DHCP server configuration error. Stop DHCP lease ip '$stop' should be an address equal to or later than the Start DHCP lease ip '$start'\n";
+                                                                $error = 1;
+                                   			    }
 							    $genout .=  "\t\trange $start $stop;\n";
 							} else {
 								print stderr "DHCP server configuration error. Stop DHCP lease ip not defined for Start DHCP lease ip '$start'\n";
