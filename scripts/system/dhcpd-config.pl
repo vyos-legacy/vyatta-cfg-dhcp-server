@@ -164,13 +164,17 @@ if ($vcDHCP->exists('.')) {
 							}
 	
 							my $stop = $vcDHCP->returnValue("$name subnet $subnet start $start stop");
-							my $naipStop = new NetAddr::IP($stop);
-							if (!$naipStop->within($naipNetwork)) {
+							if (defined $stop){
+							    my $naipStop = new NetAddr::IP($stop);
+							    if (!$naipStop->within($naipNetwork)) {
 								print stderr "DHCP server configuration error.  Stop DHCP lease ip '$stop' is outside of the DHCP lease network '$subnet' under shared network '$name'.\n";
 								$error = 1;
+							    }
+							    $genout .=  "\t\trange $start $stop;\n";
+							} else {
+								print stderr "DHCP server configuration error. Stop DHCP lease ip not defined for Start DHCP lease ip '$start'\n";
+								$error = 1;						
 							}
-	
-							$genout .=  "\t\trange $start $stop;\n";
 						}
 	
 						my @static_mapping = $vcDHCP->listNodes("$name subnet $subnet static-mapping");
