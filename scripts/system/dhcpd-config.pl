@@ -154,43 +154,86 @@ if ($vcDHCP->exists('.')) {
 							$genout .=  "\t\toption subnet-mask $client_subnet_mask;\n";
 						}
 	
-	
+						my $range_conflict_error = 1;           #prevents showing range conflict errors if basic errors for start-stop occur as well
+                                                my $ranges_stop_count = 0;
+                                                my @ranges_stop;
 						my @ranges = $vcDHCP->listNodes("$name subnet $subnet start");
 						foreach my $start (@ranges) {
 							my $naipStart = new NetAddr::IP($start);
 							if (!$naipStart->within($naipNetwork)) {
-								print stderr "DHCP server configuration error.  Start DHCP lease ip '$start' is outside of the DHCP lease network '$subnet' under shared network '$name'.\n";
+								print stderr "DHCP server configuration error.  Start DHCP lease IP '$start' is outside of the DHCP lease network '$subnet' under shared network '$name'.\n";
 								$error = 1;
+								$range_conflict_error = 0;
 							}
 	
 							my $stop = $vcDHCP->returnValue("$name subnet $subnet start $start stop");
 							if (defined $stop){
 							    my $naipStop = new NetAddr::IP($stop);
 							    if (!$naipStop->within($naipNetwork)) {
-								print stderr "DHCP server configuration error.  Stop DHCP lease ip '$stop' is outside of the DHCP lease network '$subnet' under shared network '$name'.\n";
+								print stderr "DHCP server configuration error.  Stop DHCP lease IP '$stop' is outside of the DHCP lease network '$subnet' under shared network '$name'.\n";
 								$error = 1;
+								$range_conflict_error = 0;
 							    }
 							    if ($naipStop < $naipStart) {
-			                                        print stderr "DHCP server configuration error. Stop DHCP lease ip '$stop' should be an address equal to or later than the Start DHCP lease ip '$start'\n";
+			                                        print stderr "DHCP server configuration error. Stop DHCP lease IP '$stop' should be an address equal to or later than the Start DHCP lease IP '$start'\n";
                                                                 $error = 1;
+								$range_conflict_error = 0;
                                    			    }
+                                                            $ranges_stop[$ranges_stop_count] = $stop;
+                                                            $ranges_stop_count++;
 							    $genout .=  "\t\trange $start $stop;\n";
 							} else {
-								print stderr "DHCP server configuration error. Stop DHCP lease ip not defined for Start DHCP lease ip '$start'\n";
-								$error = 1;						
+								print stderr "DHCP server configuration error. Stop DHCP lease IP not defined for Start DHCP lease IP '$start'\n";
+								$error = 1;		
+								$range_conflict_error = 0;				
 							}
 						}
-	
+
+
+                                                if ($range_conflict_error){
+                                                    my $start_count = 0;
+                                                    my $stop_count = 0;
+                                                    my @naip_conflict_start;
+                                                    my @naip_conflict_stop;
+                                                    foreach my $conflict_start (@ranges){
+                                                            $naip_conflict_start[$start_count] = new NetAddr::IP($conflict_start);
+                                                            $start_count++;
+                                                    }
+                                                    foreach my $conflict_stop (@ranges_stop){
+                                                            $naip_conflict_stop[$stop_count] = new NetAddr::IP($conflict_stop);
+                                                            $stop_count++;
+                                                    }
+                                                    my $range_count = scalar(@ranges)-1;
+                                                    my @zero_to_ranges = (0 .. $range_count);
+                                                    for my $i (@zero_to_ranges){
+                                                        for my $j (@zero_to_ranges){
+                                                            if ($i == $j){
+                                                                next;
+                                                            } else {
+                                                                   if ( ($naip_conflict_start[$j] <= $naip_conflict_start[$i]) and ($naip_conflict_start[$i] <= $naip_conflict_stop[$j]) ){
+                                                                       print stderr "Conflicting DHCP lease ranges: Start IP '$ranges[$i]' lies in DHCP lease range '$ranges[$j]'-'$ranges_stop[$j]'\n";
+                                                                       $error = 1;
+                                                                   } elsif ( ($naip_conflict_start[$j] <= $naip_conflict_stop[$i]) and ($naip_conflict_stop[$i] <= $naip_conflict_stop[$j]) ) {
+                                                                            print stderr "Conflicting DHCP lease ranges: Stop IP '$ranges_stop[$i]' lies in DHCP lease range '$ranges[$j]'-'$ranges_stop[$j]'\n";
+                                                                            $error = 1;
+                                                                     }
+                                                               }
+                                                         }
+                                                     }
+                                                } 
+
+
+
 						my @static_mapping = $vcDHCP->listNodes("$name subnet $subnet static-mapping");
 						foreach my $static_mapping (@static_mapping) {
 							my $ip_address = $vcDHCP->returnValue("$name subnet $subnet static-mapping $static_mapping ip-address");
 							if (!defined($ip_address) || $ip_address eq '') {
-								print stderr "DHCP server configuration error.  No static DHCP lease ip address specified for static mapping '$static_mapping' under shared network name '$name'.\n";
+								print stderr "DHCP server configuration error.  No static DHCP lease IP address specified for static mapping '$static_mapping' under shared network name '$name'.\n";
 								$error = 1;
 							} else {
 								my $naipIP = new NetAddr::IP($ip_address);
 								if (!$naipIP->within($naipNetwork)) {
-									print stderr "DHCP server configuration error.  Static DHCP lease ip '$ip_address' under static mapping '$static_mapping' under shared network name '$name' is outside of the DHCP lease network '$subnet'.\n";
+									print stderr "DHCP server configuration error.  Static DHCP lease IP '$ip_address' under static mapping '$static_mapping' under shared network name '$name' is outside of the DHCP lease network '$subnet'.\n";
 									$error = 1;
 								}
 							}
