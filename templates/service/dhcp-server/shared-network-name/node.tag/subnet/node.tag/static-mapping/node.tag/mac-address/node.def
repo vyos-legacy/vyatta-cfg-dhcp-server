@@ -1,2 +1,2 @@
 type: macaddr
-help: Assign static mac mapping to address
+help: Set static mac mapping for address

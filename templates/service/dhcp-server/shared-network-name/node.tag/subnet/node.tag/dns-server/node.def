@@ -1,3 +1,3 @@
 multi:
 type:  ipv4
-help: Address of dns server
+help: Set address of DNS server
