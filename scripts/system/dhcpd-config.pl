@@ -136,6 +136,11 @@ if ($vcDHCP->exists('.')) {
 							$genout .=  "\t\toption routers $default_router;\n";
 						}
 	
+						my $server_identifier = $vcDHCP->returnValue("$name subnet $subnet server-identifier");
+                                                if ($server_identifier ne '') {
+                                                        $genout .=  "\t\toption dhcp-server-identifier $server_identifier;\n";
+                                                }
+
 						my $domain_name = $vcDHCP->returnValue("$name subnet $subnet domain-name");
 						if ($domain_name ne '') {
 							$genout .=  "\t\toption domain-name \"$domain_name\";\n";
