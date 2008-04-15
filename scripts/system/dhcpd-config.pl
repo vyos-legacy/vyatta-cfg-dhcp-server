@@ -189,12 +189,13 @@ if ($vcDHCP->exists('.')) {
 							}
 						}
 
-
+						my @naip_conflict_start;
+                                                my @naip_conflict_stop;
+						my $range_count;
+						my @zero_to_ranges;
                                                 if ($range_conflict_error){
                                                     my $start_count = 0;
                                                     my $stop_count = 0;
-                                                    my @naip_conflict_start;
-                                                    my @naip_conflict_stop;
                                                     foreach my $conflict_start (@ranges){
                                                             $naip_conflict_start[$start_count] = new NetAddr::IP($conflict_start);
                                                             $start_count++;
@@ -203,8 +204,8 @@ if ($vcDHCP->exists('.')) {
                                                             $naip_conflict_stop[$stop_count] = new NetAddr::IP($conflict_stop);
                                                             $stop_count++;
                                                     }
-                                                    my $range_count = scalar(@ranges)-1;
-                                                    my @zero_to_ranges = (0 .. $range_count);
+                                                    $range_count = scalar(@ranges)-1;
+                                                    @zero_to_ranges = (0 .. $range_count);
                                                     for my $i (@zero_to_ranges){
                                                         for my $j (@zero_to_ranges){
                                                             if ($i == $j){
@@ -236,6 +237,13 @@ if ($vcDHCP->exists('.')) {
 									print stderr "DHCP server configuration error.  Static DHCP lease IP '$ip_address' under static mapping '$static_mapping' under shared network name '$name' is outside of the DHCP lease network '$subnet'.\n";
 									$error = 1;
 								}
+								for my $i (@zero_to_ranges){
+                                                                       if ( ($naip_conflict_start[$i]  <= $naipIP) and ($naipIP <= $naip_conflict_stop[$i]) ){
+                                                                           print stderr "DHCP server configuration error. Static DHCP lease IP '$ip_address' under static mapping '$static_mapping' lies in DHCP lease range '$ranges[$i]'-'$ranges_stop[$i]'\n";
+                                                                           $error = 1;
+                                                                       }
+                                                                }
+
 							}
 		
 							my $mac_address = $vcDHCP->returnValue("$name subnet $subnet static-mapping $static_mapping mac-address");
