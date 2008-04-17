@@ -1,3 +1,0 @@
-multi:
-type:  ipv4
-help: Exclude IP address from lease range
