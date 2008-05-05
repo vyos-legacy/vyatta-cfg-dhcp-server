@@ -59,6 +59,8 @@ if ($vcDHCP->exists('.')) {
 	
 	my $totalSubnetsLeased = 0;
 	my $totalSubnetsMatched = 0;
+        my $subnet_count = 0;
+        my @all_subnets;        
 	
 	@names = $vcDHCP->listNodes();
 	if (@names == 0) {
@@ -77,6 +79,9 @@ if ($vcDHCP->exists('.')) {
 				foreach my $subnet (@subnets) {
 
 					my $naipNetwork = new NetAddr::IP("$subnet");
+                                        $all_subnets[$subnet_count] = $naipNetwork;
+                                        $subnet_count++;
+
 					if (defined($naipNetwork)) {
 
 						$totalSubnetsLeased++;
@@ -286,6 +291,21 @@ if ($vcDHCP->exists('.')) {
 			$genout .=  "}\n";
 		}
 	}
+
+        my @zero_to_subnet_count = (0 .. ($subnet_count-1));
+        for my $iloop (@zero_to_subnet_count){
+            for my $jloop (@zero_to_subnet_count){
+                if ($iloop == $jloop){
+                    next;
+                } else {
+                         if ( $all_subnets[$jloop]->within($all_subnets[$iloop]) ) {
+                               print stderr "Conflicting subnet ranges: $all_subnets[$jloop] overlaps $all_subnets[$iloop]\n";
+                               $error = 1;
+                         }
+
+                }
+            }
+        }
 	
 	if ($totalSubnetsLeased > 0 && $totalSubnetsMatched == 0) {
 		print stderr "DHCP server configuration error.  None of the DHCP lease subnets attempted in commit are inside any of the ethernet interface subnets configured on this system.  At least one DHCP lease subnet must be inside an ethernet interface subnet.\n";
