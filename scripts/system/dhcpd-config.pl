@@ -53,9 +53,15 @@ if ($vcDHCP->exists('.')) {
 	}
 
 	# The ISC DHCPD server version V3.0.3 refuses to start without the 'ddns-update-style' parameter.
-	# The book 'The DHCP Handbook' ISBN 0-672-32327-3 recommends the 'interim' setting on page 403.
-	$genout_initial .=  "ddns-update-style interim;\n\n";
-	
+	# if the user specifies to use dyanmic DNS update then use the 'interim' setting otherwise use 'none' for it.
+	$vcDHCP->setLevel('service dhcp-server dynamic-DNS-update');
+        my $dynamic_DNS_update = $vcDHCP->returnValue('enable');
+        if (defined($dynamic_DNS_update) && $dynamic_DNS_update eq 'true') {
+	        $genout_initial .=  "ddns-update-style interim;\n\n";
+	} else {
+		$genout_initial .=  "ddns-update-style none;\n\n";
+	}
+
 	$vcDHCP->setLevel('service dhcp-server shared-network-name');
 	$vcIE->setLevel('interfaces ethernet');
 	
