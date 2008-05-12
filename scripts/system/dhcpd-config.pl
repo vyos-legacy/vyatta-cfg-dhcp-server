@@ -148,7 +148,100 @@ if ($vcDHCP->exists('.')) {
 							}
 							$genout .=  ";\n";
 						}
-	
+
+                                                my @ntp_servers = $vcDHCP->returnValues("$name subnet $subnet ntp-server");
+                                                if (@ntp_servers > 0) {
+                                                        $genout .=  "\t\toption ntp-servers ";
+                                                        my $num = 0;
+                                                        foreach my $ntp_server (@ntp_servers) {
+                                                                if ($ntp_server ne '') {
+                                                                        if ($num > 0) {
+                                                                                $genout .=  ', ';
+                                                                        }
+                                                                        $genout .=  "$ntp_server";
+                                                                        $num++;
+                                                                }
+                                                        }
+                                                        $genout .=  ";\n";
+                                                }
+
+
+                                                my @pop_servers = $vcDHCP->returnValues("$name subnet $subnet pop-server");
+                                                if (@pop_servers > 0) {
+                                                        $genout .=  "\t\toption pop-server ";
+                                                        my $num = 0;
+                                                        foreach my $pop_server (@pop_servers) {
+                                                                if ($pop_server ne '') {
+                                                                        if ($num > 0) {
+                                                                                $genout .=  ', ';
+                                                                        }
+                                                                        $genout .=  "$pop_server";
+                                                                        $num++;
+                                                                }
+                                                        }
+                                                        $genout .=  ";\n";
+                                                }
+
+
+                                                my @smtp_servers = $vcDHCP->returnValues("$name subnet $subnet smtp-server");
+                                                if (@smtp_servers > 0) {
+                                                        $genout .=  "\t\toption smtp-server ";
+                                                        my $num = 0;
+                                                        foreach my $smtp_server (@smtp_servers) {
+                                                                if ($smtp_server ne '') {
+                                                                        if ($num > 0) {
+                                                                                $genout .=  ', ';
+                                                                        }
+                                                                        $genout .=  "$smtp_server";
+                                                                        $num++;
+                                                                }
+                                                        }
+                                                        $genout .=  ";\n";
+                                                }
+
+                                                my @time_servers = $vcDHCP->returnValues("$name subnet $subnet time-server");
+                                                if (@time_servers > 0) {
+                                                        $genout .=  "\t\toption time-servers ";
+                                                        my $num = 0;
+                                                        foreach my $time_server (@time_servers) {
+                                                                if ($time_server ne '') {
+                                                                        if ($num > 0) {
+                                                                                $genout .=  ', ';
+                                                                        }
+                                                                        $genout .=  "$time_server";
+                                                                        $num++;
+                                                                }
+                                                        }
+                                                        $genout .=  ";\n";
+                                                }
+
+                                                my @wins_servers = $vcDHCP->returnValues("$name subnet $subnet wins-server");
+                                                if (@wins_servers > 0) {
+                                                        $genout .=  "\t\toption netbios-name-servers ";
+                                                        my $num_netbios = 0;
+                                                        foreach my $wins_server (@wins_servers) {
+                                                                if ($wins_server ne '') {
+                                                                        if ($num_netbios > 0) {
+                                                                                $genout .=  ', ';
+                                                                        }
+                                                                        $genout .=  "$wins_server";
+                                                                        $num_netbios++;
+                                                                }
+                                                        }
+                                                        $genout .=  ";\n";
+                                                }
+
+        					my $ip_forwarding = $vcDHCP->returnValue("$name subnet $subnet ip-forwarding enable");
+					        if (defined($ip_forwarding)) {
+					            if ($ip_forwarding eq 'true') {
+					                $genout .=  "\t\toption ip-forwarding true;\n";
+					            } else {
+					                $genout .=  "\t\toption ip-forwarding false;\n";
+						    }
+					        }
+
+						
+
 						my $default_router = $vcDHCP->returnValue("$name subnet $subnet default-router");
 						if ($default_router ne '') {
 							$genout .=  "\t\toption routers $default_router;\n";
@@ -163,6 +256,22 @@ if ($vcDHCP->exists('.')) {
 						if ($domain_name ne '') {
 							$genout .=  "\t\toption domain-name \"$domain_name\";\n";
 						}
+
+                                                my $tftp_server_name = $vcDHCP->returnValue("$name subnet $subnet tftp-server-name");
+                                                if ($tftp_server_name ne '') {
+                                                        $genout .=  "\t\toption tftp-server-name \"$tftp_server_name\";\n";
+                                                }
+
+                                                my $bootfile_name = $vcDHCP->returnValue("$name subnet $subnet bootfile-name");
+                                                if ($bootfile_name ne '') {
+                                                        $genout .=  "\t\toption bootfile-name \"$bootfile_name\";\n";
+                                                }
+
+                                                my $time_offset = $vcDHCP->returnValue("$name subnet $subnet time-offset");
+                                                if ($time_offset ne '') {
+                                                        $genout .=  "\t\toption time-offset $time_offset;\n";
+                                                }
+
 						
 						my $client_prefix_length = $vcDHCP->returnValue("$name subnet $subnet client-prefix-length");
 						if ($client_prefix_length ne '') {
@@ -311,21 +420,6 @@ if ($vcDHCP->exists('.')) {
 							}
 						}
 	
-						my @wins_servers = $vcDHCP->returnValues("$name subnet $subnet wins-server");
-						if (@wins_servers > 0) {
-							$genout .=  "\t\toption netbios-name-servers ";
-							my $num_netbios = 0;
-							foreach my $wins_server (@wins_servers) {
-								if ($wins_server ne '') {
-									if ($num_netbios > 0) {
-										$genout .=  ', ';
-									}
-									$genout .=  "$wins_server";
-									$num_netbios++;
-								}
-							}
-							$genout .=  ";\n";
-						}
 						$genout .=  "\t}\n";
 					}
 				}
