@@ -38,6 +38,8 @@ $genout_initial .=  "# using 'new config' directory:     $vcDHCP->{_new_config_d
 my @names;
 
 my $disabled = 0;
+my $genout_initial_static_route_count = 0;
+my $genout_initial_wpad_count = 0;
 
 $vcDHCP->setLevel('service dhcp-server');
 if ($vcDHCP->exists('.')) {
@@ -57,9 +59,9 @@ if ($vcDHCP->exists('.')) {
 	$vcDHCP->setLevel('service dhcp-server dynamic-DNS-update');
         my $dynamic_DNS_update = $vcDHCP->returnValue('enable');
         if (defined($dynamic_DNS_update) && $dynamic_DNS_update eq 'true') {
-	        $genout_initial .=  "ddns-update-style interim;\n\n";
+	        $genout_initial .=  "ddns-update-style interim;\n";
 	} else {
-		$genout_initial .=  "ddns-update-style none;\n\n";
+		$genout_initial .=  "ddns-update-style none;\n";
 	}
 
 	$vcDHCP->setLevel('service dhcp-server shared-network-name');
@@ -231,6 +233,34 @@ if ($vcDHCP->exists('.')) {
                                                         $genout .=  ";\n";
                                                 }
 
+                                                my $destination_subnet = $vcDHCP->returnValue("$name subnet $subnet static-route destination-subnet");
+						my $router_for_destination = $vcDHCP->returnValue("$name subnet $subnet static-route router");
+                                                if ($destination_subnet ne '' && $router_for_destination ne '') {
+							if ($genout_initial_static_route_count == 0) {
+							$genout_initial .= "option rfc3442-static-route code 121 = string;\n";
+							$genout_initial .= "option windows-static-route code 249 = string;\n";
+							$genout_initial_static_route_count = 1;
+							}
+							my $slash_position = rindex ($destination_subnet, '/') + 1;
+							my $destination_subnet_prefix = substr($destination_subnet, $slash_position);
+							my $destination_naipNetwork = new NetAddr::IP("$destination_subnet");
+	                                                my $sub = $destination_naipNetwork->addr();
+							my $hex_subnet = converttohex($sub);							
+							my $prefix_plus_subnet = prefix_and_subnet($destination_subnet_prefix, $hex_subnet);
+							my $router_naip = new NetAddr::IP("$router_for_destination");
+							my $hex_router = converttohex($router_naip);
+
+							my $hex_route = $prefix_plus_subnet . $hex_router;
+							$genout .=  "\t\toption rfc3442-static-route $hex_route;\n";
+							$genout .=  "\t\toption windows-static-route $hex_route;\n";
+                                                } elsif ($destination_subnet eq '' && $router_for_destination eq '') {
+							# do nothing, basically static-route has not been configured					
+						} else {
+                                                        print stderr "Please specify the missing DHCP static-route parameter:\n";
+                                                        print stderr "destination-subnet | router\n";
+                                                        $error = 1;
+						}
+
         					my $ip_forwarding = $vcDHCP->returnValue("$name subnet $subnet ip-forwarding enable");
 					        if (defined($ip_forwarding)) {
 					            if ($ip_forwarding eq 'true') {
@@ -272,6 +302,14 @@ if ($vcDHCP->exists('.')) {
                                                         $genout .=  "\t\toption time-offset $time_offset;\n";
                                                 }
 
+                                                my $wpad_url = $vcDHCP->returnValue("$name subnet $subnet wpad-url");
+                                                if ($wpad_url ne '') {
+						    if ($genout_initial_wpad_count == 0){
+							$genout_initial .= "option wpad-url code 252 = text;\n\n";
+							$genout_initial_wpad_count = 1;
+							}
+                                                    $genout .=  "\t\toption wpad-url \"$wpad_url\";\n";
+                                                }
 						
 						my $client_prefix_length = $vcDHCP->returnValue("$name subnet $subnet client-prefix-length");
 						if ($client_prefix_length ne '') {
@@ -530,3 +568,49 @@ sub doCheckIfAddressPLInsideNetwork {
 	return 0;
 }
 
+
+sub converttohex {
+	my ($ipv4_address) = @_;
+	my $dot_char = ".";
+	$ipv4_address .= $dot_char;
+	my @dot_indices;
+	my @decimal_numbers;
+	my $hex_string;
+
+	for my $i (0 .. 3) {
+		$dot_indices[$i] = index($ipv4_address, $dot_char);
+		$decimal_numbers[$i] = substr($ipv4_address, 0, $dot_indices[$i]);
+		$ipv4_address = substr($ipv4_address, $dot_indices[$i] + 1);
+                $hex_string .= sprintf("%02x", $decimal_numbers[$i]);
+                if ($i != 3) {
+                    $hex_string .= ":";
+                }
+	
+	}
+
+	return $hex_string;	
+}
+
+sub prefix_and_subnet {
+	my ($prefix, $subnet) =  @_;
+	my $hex_prefix .= sprintf("%02x", $prefix);
+	my $prefix_subnet_string = "";
+
+	if ($prefix == 0) {
+		# do nothing as this needs to be an empty string
+
+	} elsif (($prefix >= 1) && ($prefix <= 8)) {
+		$prefix_subnet_string = $hex_prefix . ":" . substr($subnet, 0, 3);
+
+	} elsif (($prefix >= 9) && ($prefix <= 16)) {
+		$prefix_subnet_string = $hex_prefix . ":" . substr($subnet, 0, 6);
+
+	} elsif (($prefix >= 17) && ($prefix <= 24)) {
+		$prefix_subnet_string = $hex_prefix . ":" . substr($subnet, 0, 9);
+
+	} elsif (($prefix >= 25) && ($prefix <= 32)) {
+		$prefix_subnet_string = $hex_prefix . ":" . $subnet . ":";
+	}
+
+	return $prefix_subnet_string;
+}
