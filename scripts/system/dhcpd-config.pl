@@ -585,7 +585,7 @@ EOM
                         }
 
                       if ($error == 0) {
-                       my @exclude_ips = $vcDHCP->returnValues("$name subnet $subnet exclude-ip");
+                       my @exclude_ips = $vcDHCP->returnValues("$name subnet $subnet exclude");
                        if (@exclude_ips > 0) {
                        # do a check that all these exclude ips are inside the subnet
                         foreach my $each_exclude_ip (@exclude_ips) {
