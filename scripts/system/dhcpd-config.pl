@@ -80,9 +80,11 @@ if ( $vcDHCP->exists('.') ) {
 
     my $disabled_val = $vcDHCP->returnValue('disabled');
     if ( defined($disabled_val) && $disabled_val eq 'true' ) {
-        my $msg =
-"Warning:  DHCP server will be deactivated because 'service dhcp-server disabled' is set to 'true'.\n";
-        print stderr $msg;
+	my $msg = <<"EOM";
+Warning:  DHCP server will be deactivated because 
+'service dhcp-server disabled' is 'true'
+EOM
+	print STDERR $msg;
         $disabled = 1;
         $genout_initial .= "\n";
         $genout_initial .= '# ' . $msg;
@@ -115,8 +117,10 @@ if ( $vcDHCP->exists('.') ) {
 
     @names = $vcDHCP->listNodes();
     if ( @names == 0 ) {
-        print stderr
-"DHCP server configuration error.  No DHCP shared networks configured.  At least one DHCP shared network must be configured.\n";
+        print STDERR <<"EOM";
+No DHCP shared networks configured. 
+At least one DHCP shared network must be configured.
+EOM
         $error = 1;
     }
     else {
@@ -126,8 +130,10 @@ if ( $vcDHCP->exists('.') ) {
 
             my @subnets = $vcDHCP->listNodes("$name subnet");
             if ( @subnets == 0 ) {
-                print stderr
-"DHCP server configuration error.  No DHCP lease subnets configured for shared network name '$name'.  At least one DHCP lease subnet must be configured for each shared network.\n";
+                print STDERR <<"EOM";
+No DHCP lease subnets configured for shared network name '$name'.
+At least one DHCP lease subnet must be configured for each shared network.
+EOM
                 $error = 1;
             }
             else {
@@ -333,9 +339,10 @@ if ( $vcDHCP->exists('.') ) {
                     # do nothing, basically static-route has not been configured
                         }
                         else {
-                            print stderr
-"Please specify the missing DHCP static-route parameter:\n";
-                            print stderr "destination-subnet | router\n";
+			    print STDERR <<"EOM";
+Please specify the missing DHCP static-route parameter:
+destination-subnet | router
+EOM
                             $error = 1;
                         }
 
@@ -450,10 +457,10 @@ if ( $vcDHCP->exists('.') ) {
                         # do nothing, basically failover has not been configured
                         }
                         else {
-                            print stderr
-"Please set one or more of the missing DHCP failover parameters:\n";
-                            print stderr
-                              "local-address | peer-address | name | status\n";
+                            print STDERR <<"EOM";
+Please set one or more of the missing DHCP failover parameters:
+local-address | peer-address | name | status
+EOM
                             $error = 1;
                         }
 
@@ -471,8 +478,8 @@ if ( $vcDHCP->exists('.') ) {
                         my @ranges =
                           $vcDHCP->listNodes("$name subnet $subnet start");
                         if ( @ranges == 0 ) {
-                            print stderr
-"DHCP server configuration error.  No DHCP start-stop range set for subnet $subnet\n";
+                            print STDERR
+"No DHCP start-stop range set for subnet $subnet\n";
                             $range_conflict_error = 0;
                             $error                = 1;
                         }
@@ -480,8 +487,10 @@ if ( $vcDHCP->exists('.') ) {
                             foreach my $start (@ranges) {
                                 my $naipStart = new NetAddr::IP($start);
                                 if ( !$naipStart->within($naipNetwork) ) {
-                                    print stderr
-"DHCP server configuration error.  Start DHCP lease IP '$start' is outside of the DHCP lease network '$subnet' under shared network '$name'.\n";
+                                    print STDERR <<"EOM";
+Start DHCP lease IP '$start' is outside of the DHCP lease network '$subnet'
+under shared network '$name'.
+EOM
                                     $error                = 1;
                                     $range_conflict_error = 0;
                                 }
@@ -490,14 +499,18 @@ if ( $vcDHCP->exists('.') ) {
                                 if ( defined $stop ) {
                                     my $naipStop = new NetAddr::IP($stop);
                                     if ( !$naipStop->within($naipNetwork) ) {
-                                        print stderr
-"DHCP server configuration error.  Stop DHCP lease IP '$stop' is outside of the DHCP lease network '$subnet' under shared network '$name'.\n";
+                                        print STDERR <<"EOM";
+Stop DHCP lease IP '$stop' is outside of the DHCP lease network '$subnet'
+under shared network '$name'.
+EOM
                                         $error                = 1;
                                         $range_conflict_error = 0;
                                     }
                                     if ( $naipStop < $naipStart ) {
-                                        print stderr
-"DHCP server configuration error. Stop DHCP lease IP '$stop' should be an address equal to or later than the Start DHCP lease IP '$start'\n";
+                                        print STDERR <<"EOM";
+Stop DHCP lease IP '$stop' should be an address equal to or later 
+than the Start DHCP lease IP '$start'
+EOM
                                         $error                = 1;
                                         $range_conflict_error = 0;
                                     }
@@ -506,8 +519,8 @@ if ( $vcDHCP->exists('.') ) {
                                     $genout .= "\t\t\trange $start $stop;\n";
                                 }
                                 else {
-                                    print stderr
-"DHCP server configuration error. Stop DHCP lease IP not defined for Start DHCP lease IP '$start'\n";
+                                    print STDERR
+"Stop DHCP lease IP not defined for Start DHCP lease IP '$start'\n";
                                     $error                = 1;
                                     $range_conflict_error = 0;
                                 }
@@ -548,8 +561,10 @@ if ( $vcDHCP->exists('.') ) {
                                                 $naip_conflict_stop[$j] )
                                           )
                                         {
-                                            print stderr
-"Conflicting DHCP lease ranges: Start IP '$ranges[$i]' lies in DHCP lease range '$ranges[$j]'-'$ranges_stop[$j]'\n";
+                                            print STDERR <<"EOM";
+Conflicting DHCP lease ranges: Start IP '$ranges[$i]'
+lies in DHCP lease range '$ranges[$j]'-'$ranges_stop[$j]'.
+EOM.
                                             $error = 1;
                                         }
                                         elsif (
@@ -561,8 +576,10 @@ if ( $vcDHCP->exists('.') ) {
                                                 $naip_conflict_stop[$j] )
                                           )
                                         {
-                                            print stderr
-"Conflicting DHCP lease ranges: Stop IP '$ranges_stop[$i]' lies in DHCP lease range '$ranges[$j]'-'$ranges_stop[$j]'\n";
+                                            print STDERR <<"EOM";
+Conflicting DHCP lease ranges: Stop IP '$ranges_stop[$i]' 
+lies in DHCP lease range '$ranges[$j]'-'$ranges_stop[$j]'.
+EOM
                                             $error = 1;
                                         }
                                     }
@@ -578,15 +595,19 @@ if ( $vcDHCP->exists('.') ) {
 "$name subnet $subnet static-mapping $static_mapping ip-address"
                               );
                             if ( !defined($ip_address) || $ip_address eq '' ) {
-                                print stderr
-"DHCP server configuration error.  No static DHCP lease IP address specified for static mapping '$static_mapping' under shared network name '$name'.\n";
+                                print STDERR <<"EOM";
+No static DHCP lease IP address specified for static mapping '$static_mapping'
+under shared network name '$name'.
+EOM
                                 $error = 1;
                             }
                             else {
                                 my $naipIP = new NetAddr::IP($ip_address);
                                 if ( !$naipIP->within($naipNetwork) ) {
-                                    print stderr
-"DHCP server configuration error.  Static DHCP lease IP '$ip_address' under static mapping '$static_mapping' under shared network name '$name' is outside of the DHCP lease network '$subnet'.\n";
+                                    print STDERR <<"EOM";
+Static DHCP lease IP '$ip_address' under static mapping '$static_mapping'
+under shared network name '$name' is outside of the DHCP lease network '$subnet'.
+EOM
                                     $error = 1;
                                 }
                                 for my $i (@zero_to_ranges) {
@@ -594,8 +615,10 @@ if ( $vcDHCP->exists('.') ) {
                                         and
                                         ( $naipIP <= $naip_conflict_stop[$i] ) )
                                     {
-                                        print stderr
-"DHCP server configuration error. Static DHCP lease IP '$ip_address' under static mapping '$static_mapping' lies in DHCP lease range '$ranges[$i]'-'$ranges_stop[$i]'\n";
+                                        print STDERR <<"EOM";
+Static DHCP lease IP '$ip_address' under static mapping '$static_mapping'
+lies in DHCP lease range '$ranges[$i]'-'$ranges_stop[$i]'.
+EOM
                                         $error = 1;
                                     }
                                 }
@@ -608,8 +631,10 @@ if ( $vcDHCP->exists('.') ) {
                               );
                             if ( !defined($mac_address) || $mac_address eq '' )
                             {
-                                print stderr
-"DHCP server configuration error.  No static DHCP lease mac address specified for static mapping '$static_mapping' under shared network name '$name'.\n";
+                                print STDERR <<"EOM";
+No static DHCP lease mac address specified for static mapping '$static_mapping'
+under shared network name '$name'.
+EOM
                                 $error = 1;
                             }
                             if (   defined($ip_address)
@@ -685,7 +710,7 @@ if ( $vcDHCP->exists('.') ) {
             }
             else {
                 if ( $all_subnets[$jloop]->within( $all_subnets[$iloop] ) ) {
-                    print stderr
+                    print STDERR
 "Conflicting subnet ranges: $all_subnets[$jloop] overlaps $all_subnets[$iloop]\n";
                     $error = 1;
                 }
@@ -695,13 +720,15 @@ if ( $vcDHCP->exists('.') ) {
     }
 
     if ( $totalSubnetsLeased > 0 && $totalSubnetsMatched == 0 ) {
-        print stderr
-"DHCP server configuration error.  None of the DHCP lease subnets attempted in commit are inside any of the ethernet interface subnets configured on this system.  At least one DHCP lease subnet must be inside an ethernet interface subnet.\n";
+        print STDERR <<"EOM";
+None of the DHCP lease subnets attempted are inside any subnets configured
+At least one DHCP lease subnet must be inside an ethernet interface subnet.
+EOM
         $error = 1;
     }
 
     if ($error) {
-        print stderr
+        print STDERR
           "DHCP server configuration commit aborted due to error(s).\n";
         exit(1);
     }
