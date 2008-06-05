@@ -5,6 +5,9 @@ sbin_SCRIPTS =
 sbin_SCRIPTS += scripts/system/dhcpd-config.pl
 sbin_SCRIPTS += scripts/system/dhcpd.init
 
+curverdir = $(sysconfdir)/config-migrate/current
+curver_DATA = cfg-version/dhcp-server@3
+
 
 cpiop = find  . ! -regex '\(.*~\|.*\.bak\|.*\.swp\|.*\#.*\#\)' -print0 | cpio -0pd
 
