@@ -561,7 +561,7 @@ EOM
                                             print STDERR <<"EOM";
 Conflicting DHCP lease ranges: Start IP '$ranges[$i]'
 lies in DHCP lease range '$ranges[$j]'-'$ranges_stop[$j]'.
-EOM.
+EOM
                                             $error = 1;
                                         }
                                         elsif (
