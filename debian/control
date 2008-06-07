@@ -20,7 +20,7 @@ Depends: vyatta-dhcp3-server (>= 3.0.6.dfsg-1),
  sysklogd,
  busybox,
  sudo,
- snmpd | vyatta-snmpd
+ snmpd
 Suggests: util-linux (>= 2.13-5),
  net-tools,
  ethtool,
