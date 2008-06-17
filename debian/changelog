@@ -1,3 +1,70 @@
+vyatta-cfg-dhcp-server (0.10) unstable; urgency=low
+
+	  3.1.0
+  [ Mark O'Brien ]
+
+
+  [ Stephen Hemminger ]
+  * don't use vyatta-snmp
+
+  [ rbalocca ]
+  * Add vyatta-snmpd
+
+  [ Mohit Mehta ]
+  * clean up extraneous dot that was not ending the print statement for
+    conflicting ranges
+  * Setting current dhcp-server version for config migration
+  * changing "dynamic-DNS-update" to "dynamic-dns-update" under 'set
+    service dhcp-server'
+  * tighten syntax check for time-offset under 'set service dhcp-server
+    shared-network-name <> subnet <>'
+  * - changing 'exclude-ip' under 'set service dhcp-server shared-
+    network-name <> subnet <>' to 'exclude'
+  * Fix Bug 3247 DHCP: need Exclude option for IPs to be not assigned
+    from a range
+
+  [ Stephen Hemminger ]
+  * Fix perl warnings from use of uninitialized variables
+  * Fix message formatting
+  * indent and reformat perl script
+  * add GPL license header
+
+  [ Mohit Mehta ]
+  * Added two more DHCP options:
+  * -added the following DHCP options to be configured from the CLI:
+
+  [ rbalocca ]
+  * Ignore derived files
+
+  [ Mohit Mehta ]
+  * Fix Bug 2061 Time Out Errors Generated in /var/log/messages When
+    dhcpd is Attempting to Update Non-existant DNS Server
+  * Fix Bug 3192 Add CLI support for DHCP failover
+  * Fix Bug 2440 Commit failure when configuring a dhcp static-map name
+    that includes spaces surronded in ""
+
+  [ rbalocca ]
+  * Convert to our method of changelog creation
+
+  [ Mohit Mehta ]
+  * Fix Bug 3231 - subnet ranges for dhcp-server should be validated for
+    conflicts
+  * Fix Bug 2639 dhcp 'exclude ip' is not properly stored in the
+    /opt/vyatta/etc/dhcpd.conf file
+  * Fix Bug 2303 Reserved static address is allocated in DHCP pool
+  * Fix Bug 3069 Help strings should be standardized
+  * Fix Bug 3069 Help strings should be standardized
+  * Fix Bug 3066 conflicting DHCP start-stop ranges result in a non-
+    assignment of ip to the dhcp client
+  * Fix Bug 3071 stop ip can be less than start ip for dhcp-server
+    configuration
+  * Fix Bug 3031 Ambiguous error message when committing dhcp subnet
+    start node without stop node
+
+  [ Mark O'Brien ]
+
+ -- Mark O'Brien <mobrien@firebolt.vyatta.com>  Tue, 17 Jun 2008 09:26:02 -0700
+
 vyatta-cfg-dhcp-server (0.9) unstable; urgency=low
 
   3.0.5
