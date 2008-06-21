@@ -879,7 +879,8 @@ sub split_ranges {
  my $temp_count;
  my $stop_count;
  my $exclude_count;
-
+ my $exclude_not_in_ranges;
+ 
  for $temp_count (0 .. ($stop_ips_index-1)){
   $start_ips[$temp_count] = $all_ips[$temp_count];
  }
@@ -894,6 +895,7 @@ sub split_ranges {
 
  for my $excludeip (@exclude_ips) {
   
+  $exclude_not_in_ranges = 1;
   my $naipexcludeip = new NetAddr::IP($excludeip);
   my $range_count = scalar(@start_ips)-1;
   my @zero_to_ranges = (0 .. $range_count);
@@ -902,6 +904,7 @@ sub split_ranges {
    my $naipstartip = new NetAddr::IP($start_ips[$count]);
    my $naipstopip = new NetAddr::IP($stop_ips[$count]);
    if (($naipstartip <= $naipexcludeip) && ($naipexcludeip <= $naipstopip)){
+    $exclude_not_in_ranges = 0;
     if ($naipstartip == $naipexcludeip){
      
      my $new_naipstartip = new NetAddr::IP ($start_ips[$count], '0.0.0.0') + 1;
@@ -922,6 +925,12 @@ sub split_ranges {
        $stop_ips[$range_count+1] = $naipstopip->addr();
     }
    }
+  }
+  if ($exclude_not_in_ranges == 1) {
+      print STDOUT <<"EOM";
+DHCP server warning:
+exclude IP address '$excludeip' does not lie in any of the start-stop ranges    
+EOM
   }
  }
  return (\@start_ips, \@stop_ips);
