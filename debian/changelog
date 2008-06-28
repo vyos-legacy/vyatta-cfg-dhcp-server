@@ -1,3 +1,17 @@
+vyatta-cfg-dhcp-server (0.11) unstable; urgency=low
+
+	  3.1.1
+  [ Mark O'Brien ]
+
+
+  [ Mohit Mehta ]
+  * Fix Bug 3247 DHCP: need Exclude option for IPs to be not assigned
+    from a range
+
+  [ Mark O'Brien ]
+
+ -- Mark O'Brien <mobrien@firebolt.vyatta.com>  Sat, 28 Jun 2008 11:22:06 -0700
+
 vyatta-cfg-dhcp-server (0.10) unstable; urgency=low
 
 	  3.1.0
