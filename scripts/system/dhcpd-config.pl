@@ -433,19 +433,32 @@ EOM
                             && $failover_name         ne ''
                             && $failover_status       ne '' )
                         {
-                            $failover_subnets = $failover_subnets + 1;
-                            $failover_local_address_list[$failover_subnets] =
-                              $failover_local_address;
-                            $failover_peer_address_list[$failover_subnets] =
-                              $failover_peer_address;
-                            $failover_name_list[$failover_subnets] =
-                              $failover_name;
-                            $failover_status_list[$failover_subnets] =
-                              $failover_status;
-                            $genout .=
-                              "\t\t\tfailover peer \"$failover_name\";\n";
-                            $genout .= "\t\t\tdeny dynamic bootp clients;\n";
-
+                           my $is_there = 0;
+                           foreach my $elt (@failover_name_list) {
+                               if ($elt eq $failover_name) {
+                                   $is_there = 1;
+                                   last;
+                               }
+                           }
+                           if ($is_there == 0) {
+                              $failover_subnets = $failover_subnets + 1;
+                              $failover_local_address_list[$failover_subnets] =
+                                $failover_local_address;
+                              $failover_peer_address_list[$failover_subnets] =
+                                $failover_peer_address;
+                              $failover_name_list[$failover_subnets] =
+                                $failover_name;
+                              $failover_status_list[$failover_subnets] =
+                                $failover_status;
+                              $genout .=
+                                "\t\t\tfailover peer \"$failover_name\";\n";
+                              $genout .= "\t\t\tdeny dynamic bootp clients;\n";
+                           } else {
+                                   print STDERR <<"EOM";
+Failover names should be unique: '$failover_name' has already been configured
+EOM
+                            $error = 1;
+                           }
                         }
                         elsif ($failover_local_address eq ''
                             && $failover_peer_address eq ''
