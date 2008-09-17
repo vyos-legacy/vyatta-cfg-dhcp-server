@@ -136,6 +136,13 @@ EOM
                 $error = 1;
             }
             else {
+                   if (@subnets > 1) {
+                   my $nets = join(', ', sort(@subnets));
+                   print STDOUT <<"EOM";
+DHCP server warning: Multiple subnets configured under shared-network-name '$name'
+This implies that $nets share the same physical network
+EOM
+}
                 foreach my $subnet (@subnets) {
 
                     my $naipNetwork = new NetAddr::IP("$subnet");
