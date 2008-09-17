@@ -906,6 +906,7 @@ sub split_ranges {
   $exclude_count = $exclude_count + 1;
  }
 
+ @exclude_ips = sort(@exclude_ips);
  for my $excludeip (@exclude_ips) {
   
   $exclude_not_in_ranges = 1;
@@ -946,6 +947,33 @@ exclude IP address '$excludeip' does not lie in any of the start-stop ranges
 EOM
   }
  }
- return (\@start_ips, \@stop_ips);
+
+ # this is done to eliminate incoorect ranges where start ip > stop ip after splitting
+ # this would only happen when you're excluding an ip where
+ # start ip = stop ip = exclude ip i.e. only 1 ip in range or
+ # you're excluding stop ip and the ip before the stop ip has also been excluded
+
+ my $new_range_count = scalar(@start_ips)-1;
+ my @new_ranges = (0 .. $new_range_count);
+ my $tempcount = 0;
+ my @new_start_ips;
+ my @new_stop_ips;
+ foreach my $rangecount (@new_ranges){
+     if ( ! ( new NetAddr::IP ($start_ips[$rangecount]) > new NetAddr::IP ($stop_ips[$rangecount]))){
+         $new_start_ips[$tempcount] = $start_ips[$rangecount];
+         $new_stop_ips[$tempcount] = $stop_ips[$rangecount];
+         $tempcount++;
+     }
+ }
+
+ if (@new_start_ips == 0){
+      print STDOUT <<"EOM";
+DHCP server error:
+Cannot exclude all IP addresses defined in start-stop ranges for a subnet
+EOM
+     exit 1;
+ }
+
+ return (\@new_start_ips, \@new_stop_ips);
 }
 
