@@ -136,6 +136,16 @@ EOM
                 $error = 1;
             }
             else {
+
+                   my $authoritative = $vcDHCP->returnValue(
+                      "$name authoritative");
+                   if ( $authoritative eq 'enable' ) {
+                       $genout .= "\tauthoritative;\n";
+                   }
+                   else {
+                       $genout .= "\tnot authoritative;\n";
+                   }
+
                    if (@subnets > 1) {
                    my $nets = join(', ', sort(@subnets));
                    print STDOUT <<"EOM";
@@ -143,6 +153,7 @@ DHCP server warning: Multiple subnets configured under shared-network-name '$nam
 This implies that $nets share the same physical network
 EOM
 }
+
                 foreach my $subnet (@subnets) {
 
                     my $naipNetwork = new NetAddr::IP("$subnet");
@@ -189,15 +200,6 @@ EOM
                         my $netmask = $naipNetwork->mask();
 
                         $genout .= "\tsubnet $sub netmask $netmask {\n";
-
-                        my $authoritative = $vcDHCP->returnValue(
-                            "$name subnet $subnet authoritative");
-                        if ( $authoritative eq 'enable' ) {
-                            $genout .= "\t\tauthoritative;\n";
-                        }
-                        else {
-                            $genout .= "\t\tnot authoritative;\n";
-                        }
 
                         my @dns_servers = $vcDHCP->returnValues(
                             "$name subnet $subnet dns-server");
