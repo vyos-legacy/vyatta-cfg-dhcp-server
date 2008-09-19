@@ -426,8 +426,17 @@ EOM
                               "\t\toption subnet-mask $client_subnet_mask;\n";
                         }
 
-                        $genout .= "\t\tpool {\n"
-                          ; #for  pool specific parameters, options for the subnet should not be inside this
+                        my $lease =
+                          $vcDHCP->returnValue("$name subnet $subnet lease");
+                        if ( $lease ne '' ) {
+                            $genout .= "\t\tdefault-lease-time $lease;\n";
+                            $genout .= "\t\tmax-lease-time $lease;\n";
+                        }
+
+                        my @ranges =
+                          $vcDHCP->listNodes("$name subnet $subnet start");
+
+                        my $write_failover_pool = "";
                         my $failover_local_address = $vcDHCP->returnValue(
                             "$name subnet $subnet failover local-address");
                         my $failover_peer_address = $vcDHCP->returnValue(
@@ -450,6 +459,7 @@ EOM
                                }
                            }
                            if ($is_there == 0) {
+                            if (@ranges > 0) {
                               $failover_subnets = $failover_subnets + 1;
                               $failover_local_address_list[$failover_subnets] =
                                 $failover_local_address;
@@ -459,9 +469,18 @@ EOM
                                 $failover_name;
                               $failover_status_list[$failover_subnets] =
                                 $failover_status;
+                              $write_failover_pool = "\t";
+                              $genout .= "\t\tpool {\n";
+			      # need to write ranges under a pool when configuring failover
                               $genout .=
                                 "\t\t\tfailover peer \"$failover_name\";\n";
                               $genout .= "\t\t\tdeny dynamic bootp clients;\n";
+                            } else {
+                                   print STDERR <<"EOM";
+Atleast one start-stop range must be configured for $subnet to set up DHCP failover
+EOM
+                            $error = 1;
+                            }
                            } else {
                                    print STDERR <<"EOM";
 Failover names should be unique: '$failover_name' has already been configured
@@ -485,13 +504,6 @@ EOM
                             $error = 1;
                         }
 
-                        my $lease =
-                          $vcDHCP->returnValue("$name subnet $subnet lease");
-                        if ( $lease ne '' ) {
-                            $genout .= "\t\t\tdefault-lease-time $lease;\n";
-                            $genout .= "\t\t\tmax-lease-time $lease;\n";
-                        }
-
                         my @naip_conflict_start;
                         my @naip_conflict_stop;
                         my @zero_to_ranges;
@@ -499,13 +511,15 @@ EOM
                           ; #prevents showing range conflict errors if basic errors for start-stop occur as well
                         my $ranges_stop_count = 0;
                         my @ranges_stop;
-                        my @ranges =
-                          $vcDHCP->listNodes("$name subnet $subnet start");
                         if ( @ranges == 0 ) {
-                            print STDERR
-"No DHCP start-stop range set for subnet $subnet\n";
                             $range_conflict_error = 0;
-                            $error                = 1;
+			my @exclude_ips = $vcDHCP->returnValues("$name subnet $subnet exclude");
+                         if (@exclude_ips > 0) {
+                          print STDERR <<"EOM";
+Atleast one start-stop range must be configured for $subnet to exclude IP
+EOM
+                          $error = 1;
+                         }
                         }
                         else {
                             foreach my $start (@ranges) {
@@ -607,7 +621,7 @@ EOM
                         }
 
                       if ($error == 0) {
-                       my @exclude_ips = $vcDHCP->returnValues("$name subnet $subnet exclude");
+		       my @exclude_ips = $vcDHCP->returnValues("$name subnet $subnet exclude");
                        if (@exclude_ips > 0) {
                        # do a check that all these exclude ips are inside the subnet
                         foreach my $each_exclude_ip (@exclude_ips) {
@@ -631,26 +645,35 @@ EOM
                         my $split_range_count = scalar(@split_ranges_start)-1;
                         my @zero_to_split_ranges = (0 .. $split_range_count);
                         for my $split_range_ips (@zero_to_split_ranges) {
-			 
+			 $genout .= $write_failover_pool;
 			 $genout .=  
-			  "\t\t\trange $split_ranges_start[$split_range_ips] $split_ranges_stop[$split_range_ips];\n";
+			  "\t\trange $split_ranges_start[$split_range_ips] $split_ranges_stop[$split_range_ips];\n";
                         }
                        }
                       } else {
                          # write all the ranges as you got em
                          for my $range_ips (@zero_to_ranges) {
-
+                          $genout .= $write_failover_pool;
                           $genout .=  
-			   "\t\t\trange $ranges[$range_ips] $ranges_stop[$range_ips];\n";
+			   "\t\trange $ranges[$range_ips] $ranges_stop[$range_ips];\n";
                          }
                        }
                       }
                     }
-                    $genout .= "\t\t}\n";   # end of pool
-
+          
+                    if (!($write_failover_pool eq "")) {
+                        $genout .= "\t\t}\n";   # end of pool
+                    }
 
                         my @static_mapping = $vcDHCP->listNodes(
                             "$name subnet $subnet static-mapping");
+
+                        if ( @static_mapping == 0 && @ranges == 0 ) {
+                            print STDERR
+"No DHCP start-stop range or static-mapping set for subnet $subnet\n";
+                            $error                = 1;
+                        }
+
                         foreach my $static_mapping (@static_mapping) {
                             my $ip_address =
                               $vcDHCP->returnValue(
