@@ -695,19 +695,31 @@ under shared network name '$name' is outside of the DHCP lease network '$subnet'
 EOM
                                     $error = 1;
                                 }
+                                my $ip_in_range = 0;
                                 for my $i (@zero_to_ranges) {
                                     if ( ( $naip_conflict_start[$i] <= $naipIP )
                                         and
                                         ( $naipIP <= $naip_conflict_stop[$i] ) )
                                     {
+                                        $ip_in_range = 1;
+                                    }
+                                }
+                                if ($ip_in_range == 1) {
+                                    my $equals_exclude_ip=0;
+                                    my @exclude_ips = $vcDHCP->returnValues("$name subnet $subnet exclude");
+                                    foreach my $exclude_ip (@exclude_ips) {
+                                       if ($ip_address eq $exclude_ip) {
+                                           $equals_exclude_ip=1;
+                                       }
+                                    }
+                                    if ($equals_exclude_ip == 0){
                                         print STDERR <<"EOM";
 Static DHCP lease IP '$ip_address' under static mapping '$static_mapping'
-lies in DHCP lease range '$ranges[$i]'-'$ranges_stop[$i]'.
+lies in a defined lease range under subnet $subnet.
 EOM
                                         $error = 1;
                                     }
                                 }
-
                             }
 
                             my $mac_address =
