@@ -115,6 +115,28 @@ EOM
     my @failover_name_list;
     my @failover_status_list;
 
+
+# get ip-addresses of all broadcast interfaces on system, later we'll 
+# then check that atleast one subnet is defined such that dhcp-server 
+# is listening on atleast one broadcast interface on the system
+
+    my @interfaces_on_system = `ifconfig -a | awk '\$2 ~ /Link/ {print \$1}'`;
+    chomp @interfaces_on_system;
+    my @intf_ips = ();
+    my $intf_ips_index = 0;
+    foreach my $intf_system (@interfaces_on_system) {
+     my $is_intf_broadcast = 
+      `ip link show $intf_system 2>/dev/null | grep -i broadcast | wc -l`;
+      if ($is_intf_broadcast > 0) {
+       $intf_ips[$intf_ips_index] = 
+       `ip addr show $intf_system 2>/dev/null | grep inet | grep -v inet6 | awk '{print \$2}'`;
+       $intf_ips_index++;
+      }
+    }
+    chomp @intf_ips;
+
+
+# start with getting dhcp-server configuration from CLI
     @names = $vcDHCP->listNodes();
     if ( @names == 0 ) {
         print STDERR <<"EOM";
@@ -165,11 +187,7 @@ EOM
 
                         $totalSubnetsLeased++;
 
-                        my @eths = $vcIE->listNodes();
-                        foreach my $eth (@eths) {
-                            my @addresses = $vcIE->returnValues("$eth address");
-
-                            foreach my $address (@addresses) {
+                        foreach my $address (@intf_ips) {
                                 if (
                                     doCheckIfAddressPLInsideNetwork(
                                         $address, $naipNetwork
@@ -178,23 +196,7 @@ EOM
                                 {
                                     $totalSubnetsMatched++;
                                 }
-                            }
 
-                            my @vifs = $vcIE->listNodes("$eth vif");
-                            foreach my $vif (@vifs) {
-                                my @vif_addresses =
-                                  $vcIE->returnValues("$eth vif $vif address");
-                                foreach my $vif_address (@vif_addresses) {
-                                    if (
-                                        doCheckIfAddressPLInsideNetwork(
-                                            $vif_address, $naipNetwork
-                                        )
-                                      )
-                                    {
-                                        $totalSubnetsMatched++;
-                                    }
-                                }
-                            }
                         }
 
                         my $sub     = $naipNetwork->network()->addr();
@@ -865,8 +867,9 @@ EOM
 
     if ( $totalSubnetsLeased > 0 && $totalSubnetsMatched == 0 ) {
         print STDERR <<"EOM";
-None of the DHCP lease subnets attempted are inside any subnets configured
-At least one DHCP lease subnet must be inside an ethernet interface subnet.
+DHCP server error: None of the DHCP lease subnets are inside any of the subnets
+configured on broadcast interfaces. At least one DHCP lease subnet must be set
+such that DHCP server listens on a minimum of one broadcast interface
 EOM
         $error = 1;
     }
