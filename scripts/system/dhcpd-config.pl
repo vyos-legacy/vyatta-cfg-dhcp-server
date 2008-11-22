@@ -51,9 +51,9 @@ my $exclude_ips_count = 0;
 my $split_for_static_ip;
 
 use NetAddr::IP;    # This library is available via libnetaddr-ip-perl.deb
-use VyattaConfig;
-my $vcDHCP = new VyattaConfig();
-my $vcIE   = new VyattaConfig();
+use Vyatta::Config;
+my $vcDHCP = new Vyatta::Config();
+my $vcIE   = new Vyatta::Config();
 
 if ( $change_dir ) {
     $vcDHCP->{_changes_only_dir_base} = $change_dir;
@@ -120,8 +120,8 @@ EOM
 # then check that atleast one subnet is defined such that dhcp-server 
 # is listening on atleast one broadcast interface on the system
 
-    use VyattaMisc;
-    my @intf_ips = VyattaMisc::getInterfacesIPadresses("broadcast");
+    use Vyatta::Misc;
+    my @intf_ips = Vyatta::Misc::getInterfacesIPadresses("broadcast");
 
 # start with getting dhcp-server configuration from CLI
     @names = $vcDHCP->listNodes();
