@@ -1,3 +1,30 @@
+vyatta-cfg-dhcp-server (0.12) unstable; urgency=low
+
+	  3.2.0
+  [ Mark O'Brien ]
+
+
+  [ Mohit Mehta ]
+  * use VyattaMisc function to retrieve IP addresses for broadcast
+    interfaces
+  * Fix Bug 3803 Unable to configure DHCP if DHCP lease subnet is
+    configured on a non-Ethernet interface
+  * Fix Bug 3800 Automatically exclude address from DHCP lease range
+    when it is configured as a static map
+  * Fix Bug 3793 Unable to configure static map within dhcp lease range
+  * - create a pool statement only if failover is configured
+  * Fix Bug 3699 DHCP-server node 'authoritative' under 'subnet' should
+    be moved under 'shared-network-name'
+  * prompt the user with a warning when multiple subnets configured
+    under a shared-network-name
+  * Fix bug 3582 - dhcp-server allocates dhcp client incorrect IP
+    Address through dhcp-relay server from remote subnet
+  * Fix Bug 3638 - Option to NOT Accept Duplicate DHCP Failover Names
+
+  [ Mark O'Brien ]
+
+ -- Mark O'Brien <mobrien@firebolt.vyatta.com>  Tue, 25 Nov 2008 19:08:38 -0800
+
 vyatta-cfg-dhcp-server (0.11) unstable; urgency=low
 
 	  3.1.1
