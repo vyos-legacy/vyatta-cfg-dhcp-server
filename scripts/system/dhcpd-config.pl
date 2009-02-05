@@ -53,15 +53,12 @@ my $split_for_static_ip;
 use NetAddr::IP;    # This library is available via libnetaddr-ip-perl.deb
 use Vyatta::Config;
 my $vcDHCP = new Vyatta::Config();
-my $vcIE   = new Vyatta::Config();
 
 if ( $change_dir ) {
     $vcDHCP->{_changes_only_dir_base} = $change_dir;
-    $vcIE->{_changes_only_dir_base}   = $change_dir;
 }
 if ( $modify_dir ) {
     $vcDHCP->{_new_config_dir_base} = $modify_dir;
-    $vcIE->{_new_config_dir_base}   = $modify_dir;
 }
 
 $genout_initial .=
@@ -103,7 +100,6 @@ EOM
     }
 
     $vcDHCP->setLevel('service dhcp-server shared-network-name');
-    $vcIE->setLevel('interfaces ethernet');
 
     my $totalSubnetsLeased  = 0;
     my $totalSubnetsMatched = 0;
