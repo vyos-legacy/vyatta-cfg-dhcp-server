@@ -871,13 +871,15 @@ EOM
 
 my $output;
 if ( $out ) {
-    open $output, ">$out";
+    open $output, '>', $out
+	or die "Can't open $out : $!";
     select $output;
 }
+
 print $genout;
-if ( defined $output ) {
-    close $output;
-}
+select STDOUT;
+
+close $output if ( $output );
 
 if ( $init ) {
     if ( @names == 0 || $disabled ) {
@@ -982,19 +984,21 @@ sub split_ranges {
  my @start_ips;
  my @stop_ips;
  my @exclude_ips;
- my $temp_count;
+
  my $stop_count;
  my $exclude_count;
  my $exclude_not_in_ranges;
  
- for $temp_count (0 .. ($stop_ips_index-1)){
+ for my $temp_count (0 .. ($stop_ips_index-1)){
   $start_ips[$temp_count] = $all_ips[$temp_count];
  }
- for $temp_count ($stop_ips_index .. ($exclude_ips_index-1)){
+
+ for my $temp_count ($stop_ips_index .. ($exclude_ips_index-1)){
   $stop_ips[$stop_count] = $all_ips[$temp_count];
   $stop_count = $stop_count + 1;
  }
- for $temp_count ($exclude_ips_index .. ($all_ips_count-1)){
+
+ for my $temp_count ($exclude_ips_index .. ($all_ips_count-1)){
   $exclude_ips[$exclude_count] = $all_ips[$temp_count];
   $exclude_count = $exclude_count + 1;
  }
