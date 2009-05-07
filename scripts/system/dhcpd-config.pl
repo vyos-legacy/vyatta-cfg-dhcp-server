@@ -384,7 +384,15 @@ EOM
                             "$name subnet $subnet bootfile-name");
                         if ( $bootfile_name ne '' ) {
                             $genout .=
-                              "\t\toption bootfile-name \"$bootfile_name\";\n";
+                              "\t\toption bootfile-name \"$bootfile_name\";\n" .
+                              "\t\tfilename \"$bootfile_name\";\n";
+                        }
+
+                        my $bootfile_server = $vcDHCP->returnValue(
+                            "$name subnet $subnet bootfile-server");
+                        if ( $bootfile_server ne '' ) {
+                            $genout .=
+                              "\t\tnext-server $bootfile_server;\n";
                         }
 
                         my $time_offset = $vcDHCP->returnValue(
