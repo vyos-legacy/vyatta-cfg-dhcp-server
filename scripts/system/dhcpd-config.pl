@@ -671,13 +671,28 @@ EOM
                         my @static_mapping = $vcDHCP->listNodes(
                             "$name subnet $subnet static-mapping");
 
+			my $mapping_cnt = 0;
+			foreach my $static_mapping (@static_mapping) {
+                            my $mapping_disabled =
+                                $vcDHCP->exists(
+"$name subnet $subnet static-mapping $static_mapping disable"
+                              );
+
+                            if (defined $mapping_disabled) {
+                                # remove disabled static-mapping from array
+                                delete $static_mapping[$mapping_cnt];
+                            } 
+                            $mapping_cnt++;
+                        }
+
                         if ( @static_mapping == 0 && @ranges == 0 ) {
                             print STDERR
-"No DHCP start-stop range or static-mapping set for subnet $subnet\n";
+"No DHCP start-stop range or active static-mapping set for subnet $subnet\n";
                             $error                = 1;
                         }
 
                         foreach my $static_mapping (@static_mapping) {
+			    next if !defined $static_mapping;
                             my $ip_address =
                               $vcDHCP->returnValue(
 "$name subnet $subnet static-mapping $static_mapping ip-address"
