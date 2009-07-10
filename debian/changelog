@@ -1,3 +1,9 @@
+vyatta-cfg-dhcp-server (0.12.5) unstable; urgency=low
+
+  * add ability to disable a static-mapping defined under dhcp-server
+
+ -- Mohit Mehta <mohit.mehta@vyatta.com>  Fri, 10 Jul 2009 14:43:15 -0700
+
 vyatta-cfg-dhcp-server (0.12.4) unstable; urgency=low
 
   * UNRELEASED
