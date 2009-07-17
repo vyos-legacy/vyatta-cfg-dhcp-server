@@ -130,6 +130,13 @@ EOM
     }
     else {
         foreach my $name (@names) {
+            # skip shared-network if disabled
+            my $shared_ntwrk_disabled = $vcDHCP->exists(
+                        "$name disable");
+
+            if (defined $shared_ntwrk_disabled) {
+                next;
+            }
 
             $genout .= "shared-network $name {\n";
 
