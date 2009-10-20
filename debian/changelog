@@ -1,3 +1,9 @@
+vyatta-cfg-dhcp-server (0.12.8) unstable; urgency=low
+
+  * push priority to node.def
+
+ -- slioch <slioch@eng-140.vyatta.com>  Tue, 20 Oct 2009 16:10:44 -0700
+
 vyatta-cfg-dhcp-server (0.12.7) unstable; urgency=low
 
   * add support for disabling a DHCP shared-network configuration
