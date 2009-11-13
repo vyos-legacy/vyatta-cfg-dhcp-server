@@ -1,3 +1,9 @@
+vyatta-cfg-dhcp-server (0.12.9) unstable; urgency=low
+
+  * added version dependency for vyatta-cfg
+
+ -- Michael Larson <slioch@slioch.vyatta.com>  Fri, 13 Nov 2009 13:35:04 -0800
+
 vyatta-cfg-dhcp-server (0.12.8) unstable; urgency=low
 
   * push priority to node.def
