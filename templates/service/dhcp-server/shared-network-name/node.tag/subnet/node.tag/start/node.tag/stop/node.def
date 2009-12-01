@@ -1,2 +1,2 @@
 type:  ipv4
-help: Set stopping IP address for DHCP lease range
+help: Set stopping IP address for DHCP lease range [REQUIRED]

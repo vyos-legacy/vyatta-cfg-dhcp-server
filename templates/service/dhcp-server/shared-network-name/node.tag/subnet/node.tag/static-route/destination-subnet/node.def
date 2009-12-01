@@ -1,2 +1,2 @@
 type: ipv4net
-help: Set the destination subnet
+help: Set the destination subnet [REQUIRED]

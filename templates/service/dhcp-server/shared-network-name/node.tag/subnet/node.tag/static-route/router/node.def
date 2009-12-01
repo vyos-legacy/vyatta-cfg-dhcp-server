@@ -1,2 +1,2 @@
 type: ipv4
-help: Set IP address of router to be used to reach the destination subnet
+help: Set IP address of router to be used to reach the destination subnet [REQUIRED]

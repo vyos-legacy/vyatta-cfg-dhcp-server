@@ -1,4 +1,4 @@
 type: ipv4
-help: Set IP address of failover peer
+help: Set IP address of failover peer [REQUIRED]
 comp_help: Possible completions:
   <x.x.x.x>             IP address of failover peer
