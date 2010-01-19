@@ -1,3 +1,11 @@
+vyatta-cfg-dhcp-server (0.12.11) unstable; urgency=low
+
+  [ P Plattes ]
+  * Fix Bug 3049 Add custom option support to DHCP configuration within
+    CLI
+
+ -- Mohit Mehta <mohit.mehta@vyatta.com>  Mon, 18 Jan 2010 18:01:56 -0800
+
 vyatta-cfg-dhcp-server (0.12.10) unstable; urgency=low
 
   * added required keyword to help text.
