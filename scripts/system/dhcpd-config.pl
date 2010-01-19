@@ -99,6 +99,17 @@ EOM
         $genout_initial .= "ddns-update-style none;\n";
     }
 
+    $vcDHCP->setLevel('service dhcp-server');
+    my @global_params = $vcDHCP->returnValues("global-parameters");
+	if ( @global_params > 0 ) {
+        $genout_initial .= "# The following " . scalar @global_params . 
+" lines were added as global-parameters in the CLI and have not been validated\n";
+        foreach my $line (@global_params) {
+            $genout_initial .= "$line\n";
+        }
+        $genout_initial .= "\n";
+    }
+
     $vcDHCP->setLevel('service dhcp-server shared-network-name');
 
     my $totalSubnetsLeased  = 0;
@@ -158,6 +169,16 @@ EOM
                    else {
                        $genout .= "\tnot authoritative;\n";
                    }
+
+		   my @shared_network_params = $vcDHCP->returnValues(
+		      "$name shared-network-parameters");
+		   if ( @shared_network_params > 0 ) {
+		     $genout .= "# The following " . scalar @shared_network_params .
+" lines were added as shared-network-parameters in the CLI and have not been validated\n";
+		     foreach my $line (@shared_network_params) {
+		       $genout .= "\t$line\n";
+		     }
+		   }
 
                    if (@subnets > 1) {
                    my $nets = join(', ', sort(@subnets));
@@ -228,6 +249,16 @@ EOM
                                 }
                             }
                             $genout .= ";\n";
+                        }
+
+                        my @subnet_params = $vcDHCP->returnValues(
+                            "$name subnet $subnet subnet-parameters");
+                    	if ( @subnet_params > 0 ) {
+                            $genout .= "# The following " . scalar @subnet_params . 
+" lines were added as subnet-parameters in the CLI and have not been validated\n";
+                            foreach my $line (@subnet_params) {
+                                $genout .= "\t\t$line\n";
+                            }
                         }
 
                         my @pop_servers = $vcDHCP->returnValues(
@@ -786,6 +817,15 @@ EOM
                                 $genout .= "\t\t\tfixed-address $ip_address;\n";
                                 $genout .=
                                   "\t\t\thardware ethernet $mac_address;\n";
+                                my @static_mapping_params = $vcDHCP->returnValues(
+                                    "$name subnet $subnet static-mapping $static_mapping static-mapping-parameters");
+                            	if ( @static_mapping_params > 0 ) {
+                                    $genout .= "# The following " . scalar @static_mapping_params . 
+" lines were added as static-mapping-parameters in the CLI and have not been validated\n";
+                                    foreach my $line (@static_mapping_params) {
+                                        $genout .= "\t\t\t$line\n";
+                                    }
+                                }
                                 $genout .= "\t\t}\n";
                             }
                         }
