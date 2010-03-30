@@ -1,3 +1,10 @@
+vyatta-cfg-dhcp-server (0.12.13) unstable; urgency=low
+
+  * First pass at supporting DHCPv6 server.
+  * First pass at supporting DHCPv6 server.
+
+ -- Bob Gilligan <gilligan@vyatta.com>  Tue, 30 Mar 2010 13:52:45 -0700
+
 vyatta-cfg-dhcp-server (0.12.12) unstable; urgency=low
 
   * UNRELEASED
