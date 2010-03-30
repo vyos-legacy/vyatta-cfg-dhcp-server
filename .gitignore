@@ -12,3 +12,5 @@ debian/vyatta-cfg-dhcp-server.debhelper.log
 config
 configure
 INSTALL
+generated-templates
+
