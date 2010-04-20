@@ -1,3 +1,9 @@
+vyatta-cfg-dhcp-server (0.12.15) unstable; urgency=low
+
+  * Allow DHCPv6 server to be re-started by op-mode command.
+
+ -- Bob Gilligan <gilligan@vyatta.com>  Tue, 20 Apr 2010 14:48:30 -0700
+
 vyatta-cfg-dhcp-server (0.12.14) unstable; urgency=low
 
   * Add a license.
