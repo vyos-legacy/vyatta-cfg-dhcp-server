@@ -368,17 +368,13 @@ file: service/dhcpv6-server/node.def
 help: Configure DHCP for IPv6 (DHCPv6) server
 
 end:
-        echo "Generating the DHCPv6 config file..."
 	sudo /opt/vyatta/sbin/dhcpdv6-config.pl
 
 	if [ "$COMMIT_ACTION" = "SET" ]; then
-	    echo "Starting the DHCPv6 server..."
  	    sudo /opt/vyatta/sbin/dhcpdv6.init start
 	elif [ "$COMMIT_ACTION" = "DELETE" ]; then
-	    echo "Stopping the DHCPv6 server..."
 	    sudo /opt/vyatta/sbin/dhcpdv6.init stop
 	elif [ "$COMMIT_ACTION" = "ACTIVE" ]; then
-	    echo "Re-starting the DHCPv6 server..."
 	    sudo /opt/vyatta/sbin/dhcpdv6.init restart
 	else
 	    echo "Error: COMMIT_ACTION environment variable is not set!"

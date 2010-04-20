@@ -13,6 +13,7 @@ start() {
 	exit 1
     fi
 
+    echo "Starting the DHCPv6 server..."
     OUTPUT=`start-stop-daemon --start --make-pidfile --pidfile $PIDFILE -b \
 	--exec /usr/sbin/dhcpd3 -- -6 -f -pf /var/run/dhcpdv6-unused.pid \
 	-cf $CONFIGFILE -lf /var/log/dhcpdv6.leases 2>&1`
@@ -27,6 +28,7 @@ stop() {
     if [ -f "$PIDFILE" ]; then
 	PID=`cat $PIDFILE` 
 	if [ -n "$PID" ]; then 
+	    echo "Stopping the DHCPv6 server..."
 	    OUTPUT=`start-stop-daemon -q --stop --pidfile $PIDFILE 2>&1`
 	fi
 	rm -f $PIDFILE
