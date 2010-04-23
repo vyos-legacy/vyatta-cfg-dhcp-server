@@ -39,6 +39,37 @@
 
 ##-----------------------------------------------------------------------------
 
+file: service/dhcpv6-server/node.def
+
+help: Configure DHCP for IPv6 (DHCPv6) server
+
+end:
+	sudo /opt/vyatta/sbin/dhcpdv6-config.pl
+
+	if [ "$COMMIT_ACTION" = "SET" ]; then
+ 	    sudo /opt/vyatta/sbin/dhcpdv6.init start
+	elif [ "$COMMIT_ACTION" = "DELETE" ]; then
+	    sudo /opt/vyatta/sbin/dhcpdv6.init stop
+	elif [ "$COMMIT_ACTION" = "ACTIVE" ]; then
+	    sudo /opt/vyatta/sbin/dhcpdv6.init restart
+	else
+	    echo "Error: COMMIT_ACTION environment variable is not set!"
+            exit 0
+	fi
+        echo "Done."
+
+##-----------------------------------------------------------------------------
+
+file: service/dhcpv6-server/preference/node.def
+
+help: Set the preference of this DHCPv6 server compared with others
+
+type: u32
+
+syntax:expression: ($VAR(@) >= 0) && ($VAR(@) <= 255) ; "Preference must be between 0 and 255"
+
+##-----------------------------------------------------------------------------
+
 file: service/dhcpv6-server/shared-network/node.def
 
 tag:
@@ -121,17 +152,7 @@ syntax:expression: pattern $VAR(@) "^[-_a-zA-Z0-9.]+$" ; "invalid NIS Plus domai
 
 file: service/dhcpv6-server/shared-network/node.tag/subnet/node.tag/name-server/node.def
 
-tag:
-
-type: u32
-
-help: Set the number for one IPv6 Recursive DNS Server
-
-syntax:expression: ($VAR(@) >= 0) && ($VAR(@) < 1000) ; "Must be between 0 and 1000"
-
-##-----------------------------------------------------------------------------
-
-file: service/dhcpv6-server/shared-network/node.tag/subnet/node.tag/name-server/node.tag/address/node.def
+multi:
 
 type: ipv6
 
@@ -184,17 +205,7 @@ help: Set last in range of IPv6 addresses to be used in prefix delegation
 
 file: service/dhcpv6-server/shared-network/node.tag/subnet/node.tag/sip-server-name/node.def
 
-tag:
-
-type: u32
-
-help: Set order number of a SIP server name
-
-syntax:expression: ($VAR(@) >= 0) && ($VAR(@) < 1000) ; "Must be between 0 and 1000"
-
-##-----------------------------------------------------------------------------
-
-file: service/dhcpv6-server/shared-network/node.tag/subnet/node.tag/sip-server-name/node.tag/name/node.def
+multi:
 
 type: txt
 
@@ -206,17 +217,7 @@ syntax:expression: pattern $VAR(@) "^[-_a-zA-Z0-9.]+$" ; "invalid SIP server nam
 
 file: service/dhcpv6-server/shared-network/node.tag/subnet/node.tag/domain-search/node.def
 
-tag:
-
-type: u32
-
-help: Set order number of a domain name for client to search
-
-syntax:expression: ($VAR(@) >= 0) && ($VAR(@) <= 1000) ; "Must be between 0 and 1000"
-
-##-----------------------------------------------------------------------------
-
-file: service/dhcpv6-server/shared-network/node.tag/subnet/node.tag/domain-search/node.tag/name/node.def
+multi:
 
 type: txt
 
@@ -228,17 +229,7 @@ syntax:expression: pattern $VAR(@) "^[-_a-zA-Z0-9.]+$" ; "invalid domain name sy
 
 file: service/dhcpv6-server/shared-network/node.tag/subnet/node.tag/sip-server-address/node.def
 
-tag:
-
-type: u32
-
-help: Set order number of a SIP server address
-
-syntax:expression: ($VAR(@) >= 0) && ($VAR(@) < 1000) ; "Must be between 0 and 1000"
-
-##-----------------------------------------------------------------------------
-
-file: service/dhcpv6-server/shared-network/node.tag/subnet/node.tag/sip-server-address/node.tag/address/node.def
+multi:
 
 type: ipv6
 
@@ -248,17 +239,7 @@ help: Set IPv6 address of a SIP name server
 
 file: service/dhcpv6-server/shared-network/node.tag/subnet/node.tag/sntp-server/node.def
 
-tag:
-
-type: u32
-
-help: Set order number of a SNTP Server
-
-syntax:expression: ($VAR(@) >= 0) && ($VAR(@) < 1000) ; "Must be between 0 and 1000"
-
-##-----------------------------------------------------------------------------
-
-file: service/dhcpv6-server/shared-network/node.tag/subnet/node.tag/sntp-server/node.tag/address/node.def
+multi:
 
 type: ipv6
 
@@ -268,17 +249,7 @@ help: Set IPv6 address of an SNTP Server for client to use
 
 file: service/dhcpv6-server/shared-network/node.tag/subnet/node.tag/nisplus-server/node.def
 
-tag:
-
-type: u32
-
-help: Set order number of a NIS Plus Server
-
-syntax:expression: ($VAR(@) >= 0) && ($VAR(@) < 1000) ; "Must be between 0 and 1000"
-
-##-----------------------------------------------------------------------------
-
-file: service/dhcpv6-server/shared-network/node.tag/subnet/node.tag/nisplus-server/node.tag/address/node.def
+multi:
 
 type: ipv6
 
@@ -301,31 +272,21 @@ file: service/dhcpv6-server/shared-network/node.tag/subnet/node.tag/static-mappi
 
 type: ipv6
 
-help: Set IPv6 address for this static mapping
+help: Set the client IPv6 address for this static mapping
 
 ##-----------------------------------------------------------------------------
 
-file: service/dhcpv6-server/shared-network/node.tag/subnet/node.tag/static-mapping/node.tag/mac-address/node.def
+file: service/dhcpv6-server/shared-network/node.tag/subnet/node.tag/static-mapping/node.tag/identifier/node.def
 
-type: macaddr
+type: txt
 
-help: Set MAC address for this static mapping
+help: Set the client identifier for this static mapping
 
 ##-----------------------------------------------------------------------------
 
 file: service/dhcpv6-server/shared-network/node.tag/subnet/node.tag/nis-server/node.def
 
-tag:
-
-type: u32
-
-help: Set order number of a NIS Server
-
-syntax:expression: ($VAR(@) >= 0) && ($VAR(@) <= 1000) ; "Must be between 0 and 1000"
-
-##-----------------------------------------------------------------------------
-
-file: service/dhcpv6-server/shared-network/node.tag/subnet/node.tag/nis-server/node.tag/address/node.def
+multi:
 
 type: ipv6
 
@@ -361,23 +322,3 @@ type: u32
 
 help: Set the default time (in seconds) that will be assigned to a lease
 
-##-----------------------------------------------------------------------------
-
-file: service/dhcpv6-server/node.def
-
-help: Configure DHCP for IPv6 (DHCPv6) server
-
-end:
-	sudo /opt/vyatta/sbin/dhcpdv6-config.pl
-
-	if [ "$COMMIT_ACTION" = "SET" ]; then
- 	    sudo /opt/vyatta/sbin/dhcpdv6.init start
-	elif [ "$COMMIT_ACTION" = "DELETE" ]; then
-	    sudo /opt/vyatta/sbin/dhcpdv6.init stop
-	elif [ "$COMMIT_ACTION" = "ACTIVE" ]; then
-	    sudo /opt/vyatta/sbin/dhcpdv6.init restart
-	else
-	    echo "Error: COMMIT_ACTION environment variable is not set!"
-            exit 0
-	fi
-        echo "Done."

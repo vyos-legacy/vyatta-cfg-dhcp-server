@@ -215,24 +215,25 @@ my @pop_arr = (
 );
 
 my @leaf_arr = (
-    [ "shared-network * subnet * name-server * address *", \&push_list,
-      "VAR-8" ],
-    [ "shared-network * subnet * domain-search * name *", \&push_list,
-      "VAR-8" ],
-    [ "shared-network * subnet * sip-server-address * address *", \&push_list,
-      "VAR-8" ],
-    [ "shared-network * subnet * sip-server-name * name *", \&push_list,
-      "VAR-8" ],
-    [ "shared-network * subnet * nis-server * address *", \&push_list,
-      "VAR-8" ],
-    [ "shared-network * subnet * nisplus-server * address *", \&push_list,
-      "VAR-8" ],
+    [ "preference *", \&write_cf, "option dhcp6.preference VAR-2;\n" ], 
+    [ "shared-network * subnet * name-server *", \&push_list,
+      "VAR-6" ],
+    [ "shared-network * subnet * domain-search *", \&push_list,
+      "VAR-6" ],
+    [ "shared-network * subnet * sip-server-address *", \&push_list,
+      "VAR-6" ],
+    [ "shared-network * subnet * sip-server-name *", \&push_list,
+      "VAR-6" ],
+    [ "shared-network * subnet * nis-server *", \&push_list,
+      "VAR-6" ],
+    [ "shared-network * subnet * nisplus-server *", \&push_list,
+      "VAR-6" ],
     [ "shared-network * subnet * nis-domain *", \&write_cf,
       "        option dhcp6.nis-domain-name \"VAR-6\";\n" ],
     [ "shared-network * subnet * nisplus-domain *", \&write_cf,
-      "        option nisp-domain-name \"VAR-6\";\n" ],
-    [ "shared-network * subnet * sntp-server * address *", \&push_list,
-      "VAR-8" ],
+      "        option dhcp6.nisp-domain-name \"VAR-6\";\n" ],
+    [ "shared-network * subnet * sntp-server *", \&push_list,
+      "VAR-6" ],
     [ "shared-network * subnet * lease-time maximum *", \&write_cf,
       "        max-lease-time VAR-7;\n" ],
     [ "shared-network * subnet * lease-time minimum *", \&write_cf,
@@ -245,8 +246,8 @@ my @leaf_arr = (
       " temporary" ],
     [ "shared-network * subnet * static-mapping * ipv6-address *", \&write_cf,
       "            fixed-address6 VAR-8;\n" ],
-    [ "shared-network * subnet * static-mapping * mac-address *", \&write_cf,
-      "            hardware ethernet VAR-8;\n" ],
+    [ "shared-network * subnet * static-mapping * identifier *", \&write_cf,
+      "            host-identifier option dhcp6.ia-na VAR-8;\n" ],
 );
 
 
@@ -294,12 +295,17 @@ sub walk_tree {
     }
     my $num_values = scalar(@values);
     if ($num_values > 0) {
-	foreach my $value (sort (@values)) {
+	log_msg("Push to leaf: $level\n");
+	action_func($push_arr_ref, $level);
+
+	foreach my $value (@values) {
 	    my $leaf_value = $level . " " . $value;
 	    log_msg("Leaf: $leaf_value\n");
 
 	    action_func($leaf_arr_ref, $leaf_value);
 	}
+        log_msg("Pop to leaf: $level\n");
+	action_func($pop_arr_ref, $level);
     } else {
 	log_msg("Push to: $level\n");
 	action_func($push_arr_ref, $level);
