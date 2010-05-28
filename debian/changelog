@@ -1,3 +1,10 @@
+vyatta-cfg-dhcp-server (0.12.17) unstable; urgency=low
+
+  * Change "shared-network" to "shared-network-name" in the dhcpv6-
+    server tree.
+
+ -- Bob Gilligan <gilligan@vyatta.com>  Fri, 28 May 2010 16:58:19 -0700
+
 vyatta-cfg-dhcp-server (0.12.16) unstable; urgency=low
 
   * Simplify the multi-value parameters.
