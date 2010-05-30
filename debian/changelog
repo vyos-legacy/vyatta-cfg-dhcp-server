@@ -1,3 +1,9 @@
+vyatta-cfg-dhcp-server (0.12.18) unstable; urgency=low
+
+  * Fix generation of "temporary" option to "range6" parameter.
+
+ -- Bob Gilligan <gilligan@vyatta.com>  Sun, 30 May 2010 06:00:43 -0700
+
 vyatta-cfg-dhcp-server (0.12.17) unstable; urgency=low
 
   * Change "shared-network" to "shared-network-name" in the dhcpv6-
