@@ -116,14 +116,6 @@ help: Set first in range of consecutive IPv6 addresses to assign.
 
 ##-----------------------------------------------------------------------------
 
-file: service/dhcpv6-server/shared-network-name/node.tag/subnet/node.tag/address-range/start/node.tag/temporary/node.def
-
-# This is a valueless node
-
-help: Address range will be used for temporary addresses
-
-##-----------------------------------------------------------------------------
-
 file: service/dhcpv6-server/shared-network-name/node.tag/subnet/node.tag/address-range/start/node.tag/stop/node.def
 
 type: ipv6

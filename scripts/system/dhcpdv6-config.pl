@@ -186,6 +186,8 @@ my @push_arr = (
       "        host VAR-6 {\n" ],
     [ "shared-network-name * subnet * address-range prefix *", \&write_cf,
       "        range6 VAR-7" ],
+    [ "shared-network-name * subnet * address-range prefix * temporary",
+      \&write_cf, " temporary" ],
 );
 
 my @pop_arr = (
@@ -242,8 +244,6 @@ my @leaf_arr = (
       "        default-lease-time VAR-7;\n" ],
     [ "shared-network-name * subnet * address-range start * stop *", 
       \&write_cf, "        range6 VAR-7 VAR-9" ],
-    [ "shared-network-name * subnet * address-range prefix * temporary",
-      \&write_cf, " temporary" ],
     [ "shared-network-name * subnet * static-mapping * ipv6-address *",
       \&write_cf, "            fixed-address6 VAR-8;\n" ],
     [ "shared-network-name * subnet * static-mapping * identifier *",
@@ -293,7 +293,12 @@ sub walk_tree {
     } else {
 	 @values = $vc->returnValues($level);
     }
+
     my $num_values = scalar(@values);
+
+    # Note that valueless leaf nodes have no "values", so they don't
+    # show up as "leafs" in this test.  So, actions on such nodes must
+    # be taken at push time.
     if ($num_values > 0) {
 	log_msg("Push to leaf: $level\n");
 	action_func($push_arr_ref, $level);
