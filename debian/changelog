@@ -1,3 +1,9 @@
+vyatta-cfg-dhcp-server (0.12.20) unstable; urgency=low
+
+  * remove unused options
+
+ -- An-Cheng Huang <ancheng@vyatta.com>  Thu, 22 Jul 2010 11:53:46 -0700
+
 vyatta-cfg-dhcp-server (0.12.19) unstable; urgency=low
 
   * remove verb usage from the begining of help strings
