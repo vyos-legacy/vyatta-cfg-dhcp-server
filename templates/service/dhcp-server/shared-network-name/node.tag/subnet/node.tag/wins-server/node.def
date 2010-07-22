@@ -1,3 +1,3 @@
 multi:
 type:  ipv4
-help: Set IP address for Windows Internet Name Service (WINS) server
+help: IP address for Windows Internet Name Service (WINS) server

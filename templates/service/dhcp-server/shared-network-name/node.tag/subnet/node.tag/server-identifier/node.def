@@ -1,2 +1,2 @@
 type: ipv4
-help: Set address for DHCP server identifier
+help: Address for DHCP server identifier

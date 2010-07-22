@@ -1,2 +1,2 @@
 type: txt
-help: Set server (IP address or domain name) from which the initial boot file is to be loaded
+help: Server (IP address or domain name) from which the initial boot file is to be loaded

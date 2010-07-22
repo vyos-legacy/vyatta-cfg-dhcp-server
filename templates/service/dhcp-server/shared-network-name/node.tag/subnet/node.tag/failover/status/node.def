@@ -1,4 +1,4 @@
 type: txt
-help: Set DHCP failover peer status (primary|secondary) [REQUIRED]
+help: DHCP failover peer status (primary|secondary) [REQUIRED]
 syntax:expression: ($VAR(@) == "primary" || $VAR(@) == "secondary" ) ; \
 "invalid DHCP failover peer status $VAR(@)"

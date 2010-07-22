@@ -1,3 +1,3 @@
 type: bool
 default: false
-help: Disable DHCP server
+help: Option to disable DHCP server

@@ -41,7 +41,7 @@
 
 file: service/dhcpv6-server/node.def
 
-help: Configure DHCP for IPv6 (DHCPv6) server
+help: DHCP for IPv6 (DHCPv6) server
 
 end:
 	sudo /opt/vyatta/sbin/dhcpdv6-config.pl
@@ -62,7 +62,7 @@ end:
 
 file: service/dhcpv6-server/preference/node.def
 
-help: Set the preference of this DHCPv6 server compared with others
+help: Preference of this DHCPv6 server compared with others
 
 type: u32
 
@@ -76,7 +76,7 @@ tag:
 
 type: txt
 
-help: Set DHCPv6 shared network name [REQUIRED]
+help: DHCPv6 shared network name [REQUIRED]
 
 syntax:expression: pattern $VAR(@) "^[-_a-zA-Z0-9.]+$" ; "invalid DHCP pool name \"$VAR(@)\""
 
@@ -88,7 +88,7 @@ tag:
 
 type:  ipv6net
 
-help: Set an IPv6 DHCP subnet for this shared network [REQUIRED]
+help: IPv6 DHCP subnet for this shared network [REQUIRED]
 
 ##-----------------------------------------------------------------------------
 
@@ -96,13 +96,13 @@ file: service/dhcpv6-server/shared-network-name/node.tag/subnet/description/node
 
 type: txt
 
-help: Description of this subnet.
+help: Description of this subnet
 
 ##-----------------------------------------------------------------------------
 
 file: service/dhcpv6-server/shared-network-name/node.tag/subnet/node.tag/address-range/node.def
 
-help: Set parameters setting ranges for assigning IPv6 addresses
+help: Parameters setting ranges for assigning IPv6 addresses
 
 ##-----------------------------------------------------------------------------
 
@@ -112,7 +112,7 @@ tag:
 
 type: ipv6
 
-help: Set first in range of consecutive IPv6 addresses to assign.
+help: First in range of consecutive IPv6 addresses to assign
 
 ##-----------------------------------------------------------------------------
 
@@ -120,7 +120,7 @@ file: service/dhcpv6-server/shared-network-name/node.tag/subnet/node.tag/address
 
 type: ipv6
 
-help: Set last in range of consecutive IPv6 addresses
+help: Last in range of consecutive IPv6 addresses
 
 ##-----------------------------------------------------------------------------
 
@@ -130,7 +130,7 @@ tag:
 
 type: ipv6net
 
-help: Set IPv6 prefix defining range of addresses to assign
+help: IPv6 prefix defining range of addresses to assign
 
 ##-----------------------------------------------------------------------------
 
@@ -146,7 +146,7 @@ file: service/dhcpv6-server/shared-network-name/node.tag/subnet/node.tag/nisplus
 
 type: txt
 
-help: Set NIS Plus domain name for client to use
+help: NIS Plus domain name for client to use
 
 syntax:expression: pattern $VAR(@) "^[-_a-zA-Z0-9.]+$" ; "invalid NIS Plus domain name syntax \"$VAR(@)\""
 
@@ -158,7 +158,7 @@ multi:
 
 type: ipv6
 
-help: Set IPv6 address of a Recursive DNS Server
+help: IPv6 address of a Recursive DNS Server
 
 ##-----------------------------------------------------------------------------
 
@@ -166,7 +166,7 @@ file: service/dhcpv6-server/shared-network-name/node.tag/subnet/node.tag/nis-dom
 
 type: txt
 
-help: Set NIS domain name for client to use
+help: NIS domain name for client to use
 
 syntax:expression: pattern $VAR(@) "^[-_a-zA-Z0-9.]+$" ; "invalid NIS domain name syntax \"$VAR(@)\""
 
@@ -174,7 +174,7 @@ syntax:expression: pattern $VAR(@) "^[-_a-zA-Z0-9.]+$" ; "invalid NIS domain nam
 
 file: service/dhcpv6-server/shared-network-name/node.tag/subnet/node.tag/prefix-delegation/node.def
 
-help: Set parameters relating to IPv6 prefix delegation
+help: Parameters relating to IPv6 prefix delegation
 
 ##-----------------------------------------------------------------------------
 
@@ -183,7 +183,7 @@ tag:
 
 type: ipv6
 
-help: Set first in range of IPv6 addresses to be used in prefix delegation
+help: First in range of IPv6 addresses to be used in prefix delegation
 
 ##-----------------------------------------------------------------------------
 
@@ -191,7 +191,7 @@ file: service/dhcpv6-server/shared-network-name/node.tag/subnet/node.tag/prefix-
 
 type: u32
 
-help: Set length in bits of prefixes to be delegated
+help: Length in bits of prefixes to be delegated
 
 syntax:expression: ($VAR(@) >= 0) && ($VAR(@) <= 128) ; "Prefix must be between 0 and 128"
 
@@ -201,7 +201,7 @@ file: service/dhcpv6-server/shared-network-name/node.tag/subnet/node.tag/prefix-
 
 type: ipv6
 
-help: Set last in range of IPv6 addresses to be used in prefix delegation
+help: Last in range of IPv6 addresses to be used in prefix delegation
 
 ##-----------------------------------------------------------------------------
 
@@ -211,7 +211,7 @@ multi:
 
 type: txt
 
-help: Set a SIP server name
+help: SIP server name
 
 syntax:expression: pattern $VAR(@) "^[-_a-zA-Z0-9.]+$" ; "invalid SIP server name syntax \"$VAR(@)\""
 
@@ -223,7 +223,7 @@ multi:
 
 type: txt
 
-help: Set domain name for client to search
+help: Domain name for client to search
 
 syntax:expression: pattern $VAR(@) "^[-_a-zA-Z0-9.]+$" ; "invalid domain name syntax \"$VAR(@)\""
 
@@ -235,7 +235,7 @@ multi:
 
 type: ipv6
 
-help: Set IPv6 address of a SIP name server
+help: IPv6 address of a SIP name server
 
 ##-----------------------------------------------------------------------------
 
@@ -245,7 +245,7 @@ multi:
 
 type: ipv6
 
-help: Set IPv6 address of an SNTP Server for client to use
+help: IPv6 address of an SNTP Server for client to use
 
 ##-----------------------------------------------------------------------------
 
@@ -255,7 +255,7 @@ multi:
 
 type: ipv6
 
-help: Set IPv6 address of a NIS Plus server
+help: IPv6 address of a NIS Plus server
 
 ##-----------------------------------------------------------------------------
 
@@ -265,7 +265,7 @@ tag:
 
 type: txt
 
-help: Set name of static mapping
+help: Name of static mapping
 
 
 ##-----------------------------------------------------------------------------
@@ -274,7 +274,7 @@ file: service/dhcpv6-server/shared-network-name/node.tag/subnet/node.tag/static-
 
 type: ipv6
 
-help: Set the client IPv6 address for this static mapping
+help: Client IPv6 address for this static mapping
 
 ##-----------------------------------------------------------------------------
 
@@ -282,7 +282,7 @@ file: service/dhcpv6-server/shared-network-name/node.tag/subnet/node.tag/static-
 
 type: txt
 
-help: Set the client identifier for this static mapping
+help: Client identifier for this static mapping
 
 ##-----------------------------------------------------------------------------
 
@@ -292,13 +292,13 @@ multi:
 
 type: ipv6
 
-help: Set IPv6 address of a NIS server
+help: IPv6 address of a NIS server
 
 ##-----------------------------------------------------------------------------
 
 file: service/dhcpv6-server/shared-network-name/node.tag/subnet/node.tag/lease-time/node.def
 
-help: Set parameters relating to the lease time
+help: Parameters relating to the lease time
 
 ##-----------------------------------------------------------------------------
 
@@ -306,7 +306,7 @@ file: service/dhcpv6-server/shared-network-name/node.tag/subnet/node.tag/lease-t
 
 type: u32
 
-help: Set the maximum time (in seconds) that will be assigned to a lease
+help: Maximum time (in seconds) that will be assigned to a lease
 
 ##-----------------------------------------------------------------------------
 
@@ -314,7 +314,7 @@ file: service/dhcpv6-server/shared-network-name/node.tag/subnet/node.tag/lease-t
 
 type: u32
 
-help: Set the minimum time (in seconds) that will be assigned to a lease
+help: Minimum time (in seconds) that will be assigned to a lease
 
 ##-----------------------------------------------------------------------------
 
@@ -322,5 +322,5 @@ file: service/dhcpv6-server/shared-network-name/node.tag/subnet/node.tag/lease-t
 
 type: u32
 
-help: Set the default time (in seconds) that will be assigned to a lease
+help: Default time (in seconds) that will be assigned to a lease
 
