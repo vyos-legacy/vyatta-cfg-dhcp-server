@@ -33,13 +33,9 @@ use lib "/opt/vyatta/share/perl5/";
 
 use Getopt::Long;
 my $out;
-my $change_dir;
-my $modify_dir;
 my $init;
 GetOptions(
     "out=s"        => \$out,
-    "change_dir=s" => \$change_dir,
-    "modify_dir=s" => \$modify_dir,
     "init=s"       => \$init
 );
 
@@ -53,18 +49,6 @@ my $split_for_static_ip;
 use NetAddr::IP;    # This library is available via libnetaddr-ip-perl.deb
 use Vyatta::Config;
 my $vcDHCP = new Vyatta::Config();
-
-if ( $change_dir ) {
-    $vcDHCP->{_changes_only_dir_base} = $change_dir;
-}
-if ( $modify_dir ) {
-    $vcDHCP->{_new_config_dir_base} = $modify_dir;
-}
-
-$genout_initial .=
-  "# using 'changes only' directory:   $vcDHCP->{_changes_only_dir_base}\n";
-$genout_initial .=
-  "# using 'new config' directory:     $vcDHCP->{_new_config_dir_base}\n\n";
 
 my @names;
 
