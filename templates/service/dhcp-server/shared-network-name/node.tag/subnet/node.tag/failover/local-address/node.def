@@ -1,4 +1,2 @@
 type: ipv4
 help: IP address for failover peer to connect [REQUIRED]
-comp_help: Possible completions:
-  <x.x.x.x>             IP address for listening to connections from failover peer
