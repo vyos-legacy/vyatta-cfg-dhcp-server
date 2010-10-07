@@ -17,7 +17,7 @@ Depends: vyatta-dhcp3-server (>= 3.0.6.dfsg-1),
  coreutils (>= 5.97-5.3),
  sysv-rc,
  ntp,
- sysklogd,
+ rsyslog | system-log-daemon,
  busybox,
  sudo,
  snmpd
