@@ -295,7 +295,18 @@ sub walk_tree {
     }
 
     my $num_values = scalar(@values);
-
+    if ($num_values == 0) {
+	# We don't know if leaf nodes are single or multi-valued.
+	# The returnOrigValues and returnValues functions only
+	# return values if a leaf node is multi-valued.  So we need
+	# to check here to see if this is a leaf single-valued node.
+	#
+	my $val = $vc->returnOrigValue($level);
+	if (defined $val) {
+	    @values = ( $val );
+	    $num_values = 1;
+	}
+    }
     # Note that valueless leaf nodes have no "values", so they don't
     # show up as "leafs" in this test.  So, actions on such nodes must
     # be taken at push time.
