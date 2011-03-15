@@ -1,3 +1,9 @@
+vyatta-cfg-dhcp-server (0.12.27) unstable; urgency=low
+
+  * Bugfix 6732: Fix incorrect handling of single-value leaf nodes.
+
+ -- Bob Gilligan <gilligan@vyatta.com>  Tue, 15 Mar 2011 02:14:04 -0700
+
 vyatta-cfg-dhcp-server (0.12.26) unstable; urgency=low
 
   * new branch
