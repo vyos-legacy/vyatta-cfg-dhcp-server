@@ -301,7 +301,13 @@ sub walk_tree {
 	# return values if a leaf node is multi-valued.  So we need
 	# to check here to see if this is a leaf single-valued node.
 	#
-	my $val = $vc->returnOrigValue($level);
+	my $val;
+	if ($op_mode_flag) {
+	    $val = $vc->returnOrigValue($level);
+	} else {
+	    $val = $vc->returnValue($level);
+	}
+
 	if (defined $val) {
 	    @values = ( $val );
 	    $num_values = 1;
