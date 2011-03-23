@@ -1,3 +1,9 @@
+vyatta-cfg-dhcp-server (0.12.25+mendocino3) unstable; urgency=low
+
+  * Bugfix 6732: Fixed more API issues.
+
+ -- Bob Gilligan <gilligan@vyatta.com>  Wed, 23 Mar 2011 01:46:59 -0700
+
 vyatta-cfg-dhcp-server (0.12.25+mendocino2) unstable; urgency=low
 
   * Bugfix 6732: Fix incorrect handling of single-value leaf nodes.
