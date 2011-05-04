@@ -41,6 +41,8 @@
 
 file: service/dhcpv6-server/node.def
 
+priority: 900
+
 help: DHCP for IPv6 (DHCPv6) server
 
 end:
