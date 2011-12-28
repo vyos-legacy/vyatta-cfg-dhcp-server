@@ -1,3 +1,10 @@
+vyatta-cfg-dhcp-server (0.12.31) unstable; urgency=low
+
+  * Bugfix 6223: Generate correct config file option for static
+    mappings.
+
+ -- Bob Gilligan <gilligan@vyatta.com>  Tue, 27 Dec 2011 18:00:10 -0800
+
 vyatta-cfg-dhcp-server (0.12.30) unstable; urgency=low
 
   * new branch
