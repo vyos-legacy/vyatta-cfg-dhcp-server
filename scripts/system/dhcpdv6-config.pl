@@ -247,7 +247,7 @@ my @leaf_arr = (
     [ "shared-network-name * subnet * static-mapping * ipv6-address *",
       \&write_cf, "            fixed-address6 VAR-8;\n" ],
     [ "shared-network-name * subnet * static-mapping * identifier *",
-      \&write_cf, "            host-identifier option dhcp6.ia-na VAR-8;\n" ],
+      \&write_cf, "            host-identifier option dhcp6.client-id VAR-8;\n" ],
 );
 
 
