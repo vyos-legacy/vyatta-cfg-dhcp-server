@@ -807,6 +807,9 @@ EOM
                                     $genout .= "# The following " . scalar @static_mapping_params . 
 " lines were added as static-mapping-parameters in the CLI and have not been validated\n";
                                     foreach my $line (@static_mapping_params) {
+                                        if ( $line =~ /^filename +(.+);$/ ) {
+                                            $line = "filename \"$1\";";
+                                        }
                                         $genout .= "\t\t\t$line\n";
                                     }
                                 }
