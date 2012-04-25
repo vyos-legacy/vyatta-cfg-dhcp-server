@@ -1,3 +1,11 @@
+vyatta-cfg-dhcp-server (0.12.31+oxnard2) unstable; urgency=low
+
+  * Workaround for static-mapping-parameters filename with double
+    quotes, as per comment #14 of bug 5388 - "change the feature's
+    configuration
+
+ -- Arthur Xiong <arthur@firebolt.vyatta.com>  Tue, 24 Apr 2012 17:09:30 -0700
+
 vyatta-cfg-dhcp-server (0.12.31+oxnard1) unstable; urgency=low
 
   * new branch
