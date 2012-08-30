@@ -47,6 +47,7 @@ my $exclude_ips_count = 0;
 my $split_for_static_ip;
 
 use NetAddr::IP;    # This library is available via libnetaddr-ip-perl.deb
+use HTML::Entities; # This library is available via libhtml-parser-perl
 use Vyatta::Config;
 my $vcDHCP = new Vyatta::Config();
 
@@ -89,7 +90,8 @@ EOM
         $genout_initial .= "# The following " . scalar @global_params . 
 " lines were added as global-parameters in the CLI and have not been validated\n";
         foreach my $line (@global_params) {
-            $genout_initial .= "$line\n";
+            my $decoded_line = decode_entities("$line");
+            $genout_initial .= "$decoded_line\n";
         }
         $genout_initial .= "\n";
     }
@@ -160,7 +162,8 @@ EOM
 		     $genout .= "# The following " . scalar @shared_network_params .
 " lines were added as shared-network-parameters in the CLI and have not been validated\n";
 		     foreach my $line (@shared_network_params) {
-		       $genout .= "\t$line\n";
+           my $decoded_line = decode_entities("$line");
+           $genout .= "\t$decoded_line\n";
 		     }
 		   }
 
@@ -241,7 +244,8 @@ EOM
                             $genout .= "# The following " . scalar @subnet_params . 
 " lines were added as subnet-parameters in the CLI and have not been validated\n";
                             foreach my $line (@subnet_params) {
-                                $genout .= "\t\t$line\n";
+                              my $decoded_line = decode_entities("$line");
+                              $genout .= "\t\t$decoded_line\n";
                             }
                         }
 
@@ -810,7 +814,8 @@ EOM
                                         if ( $line =~ /^filename +(.+);$/ ) {
                                             $line = "filename \"$1\";";
                                         }
-                                        $genout .= "\t\t\t$line\n";
+                                        my $decoded_line = decode_entities("$line");
+                                        $genout .= "\t\t\t$decoded_line\n";
                                     }
                                 }
                                 $genout .= "\t\t}\n";
