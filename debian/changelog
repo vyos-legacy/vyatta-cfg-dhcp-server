@@ -1,3 +1,10 @@
+vyatta-cfg-dhcp-server (0.12.34) unstable; urgency=low
+
+  * Bugfix 8293: Apply workaround for dhcp specifically for pacifica.
+    General fix to come later
+
+ -- John Southworth <john.southworth@vyatta.com>  Wed, 05 Sep 2012 14:51:38 -0700
+
 vyatta-cfg-dhcp-server (0.12.33) unstable; urgency=low
 
   * Workaround for static-mapping-parameters filename with double
