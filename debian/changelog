@@ -1,3 +1,10 @@
+vyatta-cfg-dhcp-server (0.12.35) unstable; urgency=low
+
+  * Update .gitignore
+  * Move dhcpd.leases to /config so it is persistent
+
+ -- James Davidson <james.davidson@vyatta.com>  Mon, 17 Sep 2012 19:04:39 -0700
+
 vyatta-cfg-dhcp-server (0.12.34) unstable; urgency=low
 
   * Bugfix 8293: Apply workaround for dhcp specifically for pacifica.
