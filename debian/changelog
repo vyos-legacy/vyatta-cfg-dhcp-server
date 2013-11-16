@@ -1,3 +1,9 @@
+vyatta-cfg-dhcp-server (0.12.36+hydrogen1) unstable; urgency=low
+
+  * New branch
+
+ -- Daniil Baturin <daniil@baturin.org>  Sun, 17 Nov 2013 00:05:46 +0100
+
 vyatta-cfg-dhcp-server (0.12.36+daisy2) unstable; urgency=low
 
   * Bug #4278: allow mapping multiple MAC addresses to the same IP
