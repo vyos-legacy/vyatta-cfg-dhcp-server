@@ -1,3 +1,10 @@
+vyatta-cfg-dhcp-server (0.12.36+vyos1+helium3) unstable; urgency=low
+
+  * Bug #87: Add allowed values completion for "authoritative
+    enable/disable" option.
+
+ -- Daniil Baturin <daniil@baturin.org>  Wed, 05 Mar 2014 23:28:19 +0100
+
 vyatta-cfg-dhcp-server (0.12.36+vyos1+helium2) unstable; urgency=low
 
   * Bug #122: Move DHCPv6 leases file to /config to make it survive
