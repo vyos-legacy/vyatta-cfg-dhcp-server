@@ -221,6 +221,23 @@ EOM
                             $genout .= ";\n";
                         }
 
+                        my @domain_searches = $vcDHCP->returnValues(
+                            "$name subnet $subnet domain-search");
+                        if ( @domain_searches > 0 ) {
+                            $genout .= "\t\toption domain-search ";
+                            my $num = 0;
+                            foreach my $domain_search (@domain_searches) {
+                                if ( $domain_search ne '' ) {
+                                    if ( $num > 0 ) {
+                                        $genout .= ', ';
+                                    }
+                                    $genout .= "\"$domain_search\"";
+                                    $num++;
+                                }
+                            }
+                            $genout .= ";\n";
+                        }
+
                         my @ntp_servers = $vcDHCP->returnValues(
                             "$name subnet $subnet ntp-server");
                         if ( @ntp_servers > 0 ) {
