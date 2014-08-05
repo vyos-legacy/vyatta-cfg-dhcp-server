@@ -1,3 +1,12 @@
+vyatta-cfg-dhcp-server (0.12.36+vyos1+helium4) unstable; urgency=low
+
+  [ Geoff Wright ]
+  * Bug #188: Allow domain-search option for dhcp-server
+
+  [ Daniil Baturin ]
+
+ -- Daniil Baturin <daniil@baturin.org>  Tue, 05 Aug 2014 16:27:12 +0000
+
 vyatta-cfg-dhcp-server (0.12.36+vyos1+helium3) unstable; urgency=low
 
   * Bug #87: Add allowed values completion for "authoritative
