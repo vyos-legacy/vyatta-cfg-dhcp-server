@@ -2,7 +2,7 @@
 
 . /lib/lsb/init-functions
 
-touch /var/log/dhcpdv6.leases
+touch /config/dhcpdv6.leases
 CONFIGFILE=/opt/vyatta/etc/dhcpdv6.conf
 PIDFILE=/var/run/dhcpdv6.pid
 
