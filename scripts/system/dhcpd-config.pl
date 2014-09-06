@@ -818,7 +818,8 @@ EOM
                                 && defined($mac_address)
                                 && $mac_address ne '' )
                             {
-                                $genout .= "\t\thost $static_mapping {\n";
+                                my $prefix = $name."_";
+                                $genout .= "\t\thost $prefix$static_mapping {\n";
                                 $genout .= "\t\t\tfixed-address $ip_address;\n";
                                 $genout .=
                                   "\t\t\thardware ethernet $mac_address;\n";
