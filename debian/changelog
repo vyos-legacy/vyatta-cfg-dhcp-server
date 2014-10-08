@@ -1,3 +1,15 @@
+vyatta-cfg-dhcp-server (0.12.36+vyos1+helium5) unstable; urgency=low
+
+  [ Kim Hagen ]
+  * Bug #292 - Inconsistent dhcpdv6.leases location
+
+  [ Alex Harpin ]
+  * vyatta-cfg-dhcp-server: prefix host with shared-network-name
+
+  [ Daniil Baturin ]
+
+ -- Daniil Baturin <daniil@baturin.org>  Wed, 08 Oct 2014 16:32:10 +0200
+
 vyatta-cfg-dhcp-server (0.12.36+vyos1+helium4) unstable; urgency=low
 
   [ Geoff Wright ]
