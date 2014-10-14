@@ -44,7 +44,7 @@ GetOptions(
     "debug"		=> \$debug_flag,
     "config-file=s"	=> \$config_filename,
     "op_mode"		=> \$op_mode_flag,
-);
+    );
 
 sub log_msg {
     my $message = shift;
@@ -63,20 +63,21 @@ sub param_match {
     my @param_array = split(" ", $param);
 
     if (scalar(@match_array) != scalar(@param_array)) {
-	# match and param arrays don't even have the same number
-	# of members.  Can't match.
-	return 0;
+
+        # match and param arrays don't even have the same number
+        # of members.  Can't match.
+        return 0;
     }
 
     my $index = 0;
     foreach my $match_item (@match_array) {
-	my $param_item = @param_array[$index];
-	$index++;
-	if (!($match_item eq "*") &&
-	    !($match_item eq $param_item)) {
-	    # no wildcard or exact match
-	    return 0;
-	}
+        my $param_item = @param_array[$index];
+        $index++;
+        if (!($match_item eq "*") && !($match_item eq $param_item)) {
+
+            # no wildcard or exact match
+            return 0;
+        }
     }
     return 1;
 }
@@ -94,15 +95,14 @@ sub param_substitute {
 
     my $index = 1;
     foreach my $param (@param_template_array) {
-	if ($input_string =~ m/VAR-${index}/) {
-	    log_msg("param_substitue: substituting $param for VAR-${index} \n");
-	    $input_string =~ s/VAR-${index}/$param/;
-	}
-	$index++;
+        if ($input_string =~ m/VAR-${index}/) {
+            log_msg("param_substitue: substituting $param for VAR-${index} \n");
+            $input_string =~ s/VAR-${index}/$param/;
+        }
+        $index++;
     }
     return $input_string;
 }
-
 
 #
 # Functions that are used in the "action arrays"
@@ -119,59 +119,57 @@ sub write_cf {
 # separated by commas.
 #
 sub write_list {
-   my ($string) = @_;
+    my ($string) = @_;
 
-   my $num_items = scalar(@temp_list);
-   if ($num_items > 0) {
-       printf(CONF_FILE "$string ");
-       my $item_count = 0;
-       foreach my $item (@temp_list) {
-	   if ($item_count > 0) {
-	       printf(CONF_FILE ", ");
-	   }
-	   printf(CONF_FILE "$item");
-	   $item_count++;
-       }
-       printf(CONF_FILE ";\n");
-   }
-   @temp_list = ();
+    my $num_items = scalar(@temp_list);
+    if ($num_items > 0) {
+        printf(CONF_FILE "$string ");
+        my $item_count = 0;
+        foreach my $item (@temp_list) {
+            if ($item_count > 0) {
+                printf(CONF_FILE ", ");
+            }
+            printf(CONF_FILE "$item");
+            $item_count++;
+        }
+        printf(CONF_FILE ";\n");
+    }
+    @temp_list = ();
 }
-
 
 # A domain list differs from a simple list in that each
 # element must be enclosed in double-quotes, then
 # separated by commas.
 #
 sub write_domain_list {
-   my ($string) = @_;
+    my ($string) = @_;
 
-   my $num_items = scalar(@temp_list);
-   if ($num_items > 0) {
-       printf(CONF_FILE "$string ");
-       my $item_count = 0;
-       foreach my $item (@temp_list) {
-	   if ($item_count > 0) {
-	       printf(CONF_FILE ", ");
-	   }
-	   printf(CONF_FILE "\"$item\"");
-	   $item_count++;
-       }
-       printf(CONF_FILE ";\n");
-   }
-   @temp_list = ();
+    my $num_items = scalar(@temp_list);
+    if ($num_items > 0) {
+        printf(CONF_FILE "$string ");
+        my $item_count = 0;
+        foreach my $item (@temp_list) {
+            if ($item_count > 0) {
+                printf(CONF_FILE ", ");
+            }
+            printf(CONF_FILE "\"$item\"");
+            $item_count++;
+        }
+        printf(CONF_FILE ";\n");
+    }
+    @temp_list = ();
 }
 
-
 sub push_list {
-   my ($string) = @_;
-   push(@temp_list, $string);
+    my ($string) = @_;
+    push(@temp_list, $string);
 }
 
 #
 # We have one "action array" for each of the three transitions:
-# Pushing to a new non-leaf level, reach a leaf node with a value, and 
+# Pushing to a new non-leaf level, reach a leaf node with a value, and
 # poping back to non-lef level.  Each entry in an action array has
-# three elements:  1) a string to match against the parameter string; 
+# three elements:  1) a string to match against the parameter string;
 # 2) A function to call if it matches, and 3) a string to pass to that
 # function.  The first string supports the use of "*" as a wildcard match.
 # The third string supports a variable substitution syntax that
@@ -180,76 +178,47 @@ sub push_list {
 #
 
 my @push_arr = (
-    [ "shared-network-name *", \&write_cf,  "shared-network VAR-2 {\n" ], 
+    [ "shared-network-name *", \&write_cf, "shared-network VAR-2 {\n" ],
     [ "shared-network-name * subnet *", \&write_cf, "    subnet6 VAR-4 {\n" ],
-    [ "shared-network-name * subnet * static-mapping *", \&write_cf,
-      "        host VAR-6 {\n" ],
-    [ "shared-network-name * subnet * address-range prefix *", \&write_cf,
-      "        range6 VAR-7" ],
-    [ "shared-network-name * subnet * address-range prefix * temporary",
-      \&write_cf, " temporary" ],
-);
+    [ "shared-network-name * subnet * static-mapping *", \&write_cf, "        host VAR-6 {\n" ],
+    [ "shared-network-name * subnet * address-range prefix *", \&write_cf, "        range6 VAR-7" ],
+    [ "shared-network-name * subnet * address-range prefix * temporary", \&write_cf, " temporary" ],
+    );
 
 my @pop_arr = (
     [ "shared-network-name *", \&write_cf, "}\n" ],
     [ "shared-network-name * subnet *", \&write_cf, "    }\n" ],
-    [ "shared-network-name * subnet * name-server", \&write_list, 
-      "        option dhcp6.name-servers" ],
-    [ "shared-network-name * subnet * domain-search", \&write_domain_list, 
-      "        option dhcp6.domain-search" ],
-    [ "shared-network-name * subnet * sip-server-address", \&write_list, 
-      "        option dhcp6.sip-servers-addresses" ],
-    [ "shared-network-name * subnet * sip-server-name", \&write_domain_list, 
-      "        option dhcp6.sip-servers-names" ],
-    [ "shared-network-name * subnet * nis-server", \&write_list, 
-      "        option dhcp6.nis-servers" ],
-    [ "shared-network-name * subnet * nisplus-server", \&write_list, 
-      "        option dhcp6.nisp-servers" ],
-    [ "shared-network-name * subnet * sntp-server", \&write_list, 
-      "        option dhcp6.sntp-servers" ],
-    [ "shared-network-name * subnet * address-range start *", \&write_cf, 
-      ";\n" ],
-    [ "shared-network-name * subnet * address-range prefix *", \&write_cf, 
-      ";\n" ],
-    [ "shared-network-name * subnet * static-mapping *", \&write_cf,
-      "        }\n" ],
+    [ "shared-network-name * subnet * name-server", \&write_list, "        option dhcp6.name-servers" ],
+    [ "shared-network-name * subnet * domain-search", \&write_domain_list, "        option dhcp6.domain-search" ],
+    [ "shared-network-name * subnet * sip-server-address", \&write_list, "        option dhcp6.sip-servers-addresses" ],
+    [ "shared-network-name * subnet * sip-server-name", \&write_domain_list, "        option dhcp6.sip-servers-names" ],
+    [ "shared-network-name * subnet * nis-server", \&write_list, "        option dhcp6.nis-servers" ],
+    [ "shared-network-name * subnet * nisplus-server", \&write_list, "        option dhcp6.nisp-servers" ],
+    [ "shared-network-name * subnet * sntp-server", \&write_list, "        option dhcp6.sntp-servers" ],
+    [ "shared-network-name * subnet * address-range start *", \&write_cf, ";\n" ],
+    [ "shared-network-name * subnet * address-range prefix *", \&write_cf, ";\n" ],
+    [ "shared-network-name * subnet * static-mapping *", \&write_cf, "        }\n" ],
 
-);
+    );
 
 my @leaf_arr = (
-    [ "preference *", \&write_cf, "option dhcp6.preference VAR-2;\n" ], 
-    [ "shared-network-name * subnet * name-server *", \&push_list,
-      "VAR-6" ],
-    [ "shared-network-name * subnet * domain-search *", \&push_list,
-      "VAR-6" ],
-    [ "shared-network-name * subnet * sip-server-address *", \&push_list,
-      "VAR-6" ],
-    [ "shared-network-name * subnet * sip-server-name *", \&push_list,
-      "VAR-6" ],
-    [ "shared-network-name * subnet * nis-server *", \&push_list,
-      "VAR-6" ],
-    [ "shared-network-name * subnet * nisplus-server *", \&push_list,
-      "VAR-6" ],
-    [ "shared-network-name * subnet * nis-domain *", \&write_cf,
-      "        option dhcp6.nis-domain-name \"VAR-6\";\n" ],
-    [ "shared-network-name * subnet * nisplus-domain *", \&write_cf,
-      "        option dhcp6.nisp-domain-name \"VAR-6\";\n" ],
-    [ "shared-network-name * subnet * sntp-server *", \&push_list,
-      "VAR-6" ],
-    [ "shared-network-name * subnet * lease-time maximum *", \&write_cf,
-      "        max-lease-time VAR-7;\n" ],
-    [ "shared-network-name * subnet * lease-time minimum *", \&write_cf,
-      "        min-lease-time VAR-7;\n" ],
-    [ "shared-network-name * subnet * lease-time default *", \&write_cf,
-      "        default-lease-time VAR-7;\n" ],
-    [ "shared-network-name * subnet * address-range start * stop *", 
-      \&write_cf, "        range6 VAR-7 VAR-9" ],
-    [ "shared-network-name * subnet * static-mapping * ipv6-address *",
-      \&write_cf, "            fixed-address6 VAR-8;\n" ],
-    [ "shared-network-name * subnet * static-mapping * identifier *",
-      \&write_cf, "            host-identifier option dhcp6.client-id VAR-8;\n" ],
-);
-
+    [ "preference *", \&write_cf, "option dhcp6.preference VAR-2;\n" ],
+    [ "shared-network-name * subnet * name-server *", \&push_list, "VAR-6" ],
+    [ "shared-network-name * subnet * domain-search *", \&push_list, "VAR-6" ],
+    [ "shared-network-name * subnet * sip-server-address *", \&push_list, "VAR-6" ],
+    [ "shared-network-name * subnet * sip-server-name *", \&push_list, "VAR-6" ],
+    [ "shared-network-name * subnet * nis-server *", \&push_list, "VAR-6" ],
+    [ "shared-network-name * subnet * nisplus-server *", \&push_list, "VAR-6" ],
+    [ "shared-network-name * subnet * nis-domain *", \&write_cf, "        option dhcp6.nis-domain-name \"VAR-6\";\n" ],
+    [ "shared-network-name * subnet * nisplus-domain *", \&write_cf, "        option dhcp6.nisp-domain-name \"VAR-6\";\n" ],
+    [ "shared-network-name * subnet * sntp-server *", \&push_list, "VAR-6" ],
+    [ "shared-network-name * subnet * lease-time maximum *", \&write_cf, "        max-lease-time VAR-7;\n" ],
+    [ "shared-network-name * subnet * lease-time minimum *", \&write_cf, "        min-lease-time VAR-7;\n" ],
+    [ "shared-network-name * subnet * lease-time default *", \&write_cf, "        default-lease-time VAR-7;\n" ],
+    [ "shared-network-name * subnet * address-range start * stop *", \&write_cf, "        range6 VAR-7 VAR-9" ],
+    [ "shared-network-name * subnet * static-mapping * ipv6-address *", \&write_cf, "            fixed-address6 VAR-8;\n" ],
+    [ "shared-network-name * subnet * static-mapping * identifier *", \&write_cf, "            host-identifier option dhcp6.client-id VAR-8;\n" ],
+    );
 
 #
 # Walk through the action array passed in by reference. If an entry is
@@ -264,19 +233,19 @@ sub action_func {
     my @action_arr = @$action_arr_ref;
 
     foreach my $row (0 .. scalar(@action_arr) - 1) {
-	my $match = $action_arr[$row][0];
+        my $match = $action_arr[$row][0];
 
-	if (param_match ($match, $param)) {
-	    my $func = $action_arr[$row][1];
-	    my $arg = $action_arr[$row][2];
+        if (param_match ($match, $param)) {
+            my $func = $action_arr[$row][1];
+            my $arg = $action_arr[$row][2];
 
-	    my $action_string = param_substitute($arg, $param);
-	    &$func($action_string);
-	}
+            my $action_string = param_substitute($arg, $param);
+            &$func($action_string);
+        }
     }
 }
 
-# 
+#
 # Recursive walk of the config tree starting at $level. $vc is the
 # config pointer.  $depth records the current tree depth, primarily
 # for debugging.  The final three args are references to the three
@@ -284,68 +253,70 @@ sub action_func {
 #
 sub walk_tree {
     my ($vc, $level, $depth, $push_arr_ref, $pop_arr_ref, $leaf_arr_ref) = @_;
-    
+
     log_msg("in walk_tree at depth $depth level is: $level \n");
 
     my @values;
     if ($op_mode_flag) {
-	 @values = $vc->returnOrigValues($level);
+        @values = $vc->returnOrigValues($level);
     } else {
-	 @values = $vc->returnValues($level);
+        @values = $vc->returnValues($level);
     }
 
     my $num_values = scalar(@values);
     if ($num_values == 0) {
-	# We don't know if leaf nodes are single or multi-valued.
-	# The returnOrigValues and returnValues functions only
-	# return values if a leaf node is multi-valued.  So we need
-	# to check here to see if this is a leaf single-valued node.
-	#
-	my $val;
-	if ($op_mode_flag) {
-	    $val = $vc->returnOrigValue($level);
-	} else {
-	    $val = $vc->returnValue($level);
-	}
 
-	if (defined $val) {
-	    @values = ( $val );
-	    $num_values = 1;
-	}
+        # We don't know if leaf nodes are single or multi-valued.
+        # The returnOrigValues and returnValues functions only
+        # return values if a leaf node is multi-valued.  So we need
+        # to check here to see if this is a leaf single-valued node.
+        #
+        my $val;
+        if ($op_mode_flag) {
+            $val = $vc->returnOrigValue($level);
+        } else {
+            $val = $vc->returnValue($level);
+        }
+
+        if (defined $val) {
+            @values = ( $val );
+            $num_values = 1;
+        }
     }
+
     # Note that valueless leaf nodes have no "values", so they don't
     # show up as "leafs" in this test.  So, actions on such nodes must
     # be taken at push time.
     if ($num_values > 0) {
-	log_msg("Push to leaf: $level\n");
-	action_func($push_arr_ref, $level);
+        log_msg("Push to leaf: $level\n");
+        action_func($push_arr_ref, $level);
 
-	foreach my $value (@values) {
-	    my $leaf_value = $level . " " . $value;
-	    log_msg("Leaf: $leaf_value\n");
+        foreach my $value (@values) {
+            my $leaf_value = $level . " " . $value;
+            log_msg("Leaf: $leaf_value\n");
 
-	    action_func($leaf_arr_ref, $leaf_value);
-	}
+            action_func($leaf_arr_ref, $leaf_value);
+        }
         log_msg("Pop to leaf: $level\n");
-	action_func($pop_arr_ref, $level);
+        action_func($pop_arr_ref, $level);
     } else {
-	log_msg("Push to: $level\n");
-	action_func($push_arr_ref, $level);
+        log_msg("Push to: $level\n");
+        action_func($push_arr_ref, $level);
 
-	my @node_array;
-	if ($op_mode_flag) {
-	    @node_array = $vc->listOrigNodes($level);
-	} else {
-	    @node_array = $vc->listNodes($level);
-	}
+        my @node_array;
+        if ($op_mode_flag) {
+            @node_array = $vc->listOrigNodes($level);
+        } else {
+            @node_array = $vc->listNodes($level);
+        }
 
-	foreach my $node (sort (@node_array)) {
-	    log_msg("node at depth $depth is $node\n");
-	    walk_tree ($vc, $level . " " . $node, $depth + 1, 
-		       $push_arr_ref, $pop_arr_ref, $leaf_arr_ref);
-	}
+        foreach my $node (sort (@node_array)) {
+            log_msg("node at depth $depth is $node\n");
+            walk_tree ($vc, $level . " " . $node, $depth + 1,
+                $push_arr_ref, $pop_arr_ref, $leaf_arr_ref);
+        }
         log_msg("Pop to: $level\n");
-	action_func($pop_arr_ref, $level);
+        action_func($pop_arr_ref, $level);
     }
 }
 
@@ -361,7 +332,7 @@ my $vcDHCP = new Vyatta::Config();
 #  - Range overlaps
 
 # Walk the config tree
-# 
+#
 my $exists;
 if ($op_mode_flag) {
     $exists = $vcDHCP->existsOrig('service dhcpv6-server');
@@ -370,17 +341,18 @@ if ($op_mode_flag) {
 }
 
 if ($exists) {
+
     # Open the config file
-    # 
+    #
     if (! open(CONF_FILE, ">$config_filename")) {
-	printf("Can't open config file for writing: $config_filename\n");
-	exit 1;
+        printf("Can't open config file for writing: $config_filename\n");
+        exit 1;
     }
 
     printf("Generating the DHCPv6 config file...\n");
 
     # Write some comments so people know where it came from.
-    # 
+    #
     printf(CONF_FILE "# This file is auto-generated by the Vyatta configuration sub-system.\n");
     printf(CONF_FILE "# Do not edit it by hand.\n");
     my $iam = `whoami`;
@@ -390,23 +362,23 @@ if ($exists) {
     chomp ($date_time);
     printf(CONF_FILE "# Auto-generated on: $date_time\n");
     printf(CONF_FILE "#\n");
-    
+
     $vcDHCP->setLevel('service dhcpv6-server');
     log_msg("Initial call to walk_tree.\n");
     walk_tree($vcDHCP, "", 0, \@push_arr, \@pop_arr, \@leaf_arr);
 
     # Close the config file, we're done!
-    # 
+    #
     close(CONF_FILE);
 } else {
     if ($op_mode_flag) {
-	printf("DHCPv6 server is not configured.\n");
+        printf("DHCPv6 server is not configured.\n");
     }
+
     # No error message required when run in config mode since
     # it is expected behavior.
     exit 1;
 }
 
 exit 0;
-
 
