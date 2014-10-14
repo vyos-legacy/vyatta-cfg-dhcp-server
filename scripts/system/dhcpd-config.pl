@@ -58,37 +58,35 @@ my $genout_initial_static_route_count = 0;
 my $genout_initial_wpad_count         = 0;
 
 $vcDHCP->setLevel('service dhcp-server');
-if ( $vcDHCP->exists('.') ) {
+if ($vcDHCP->exists('.')) {
 
     my $disabled_val = $vcDHCP->returnValue('disabled');
-    if ( defined($disabled_val) && $disabled_val eq 'true' ) {
-	my $msg = <<"EOM";
+    if (defined($disabled_val) && $disabled_val eq 'true') {
+        my $msg = <<"EOM";
 Warning:  DHCP server will be deactivated because 
 'service dhcp-server disabled' is 'true'
 EOM
-	print STDERR $msg;
+        print STDERR $msg;
         $disabled = 1;
         $genout_initial .= "\n";
         $genout_initial .= '# ' . $msg;
         $genout_initial .= "\n";
     }
 
-# The ISC DHCPD server version V3.0.3 refuses to start without the 'ddns-update-style' parameter.
-# if the user specifies to use dyanmic DNS update then use the 'interim' setting otherwise use 'none' for it.
+    # The ISC DHCPD server version V3.0.3 refuses to start without the 'ddns-update-style' parameter.
+    # if the user specifies to use dyanmic DNS update then use the 'interim' setting otherwise use 'none' for it.
     $vcDHCP->setLevel('service dhcp-server dynamic-dns-update');
     my $dynamic_DNS_update = $vcDHCP->returnValue('enable');
-    if ( defined($dynamic_DNS_update) && $dynamic_DNS_update eq 'true' ) {
+    if (defined($dynamic_DNS_update) && $dynamic_DNS_update eq 'true') {
         $genout_initial .= "ddns-update-style interim;\n";
-    }
-    else {
+    } else {
         $genout_initial .= "ddns-update-style none;\n";
     }
 
     $vcDHCP->setLevel('service dhcp-server');
     my @global_params = $vcDHCP->returnValues("global-parameters");
-	if ( @global_params > 0 ) {
-        $genout_initial .= "# The following " . scalar @global_params . 
-" lines were added as global-parameters in the CLI and have not been validated\n";
+    if (@global_params > 0) {
+        $genout_initial .= "# The following ". scalar @global_params ." lines were added as global-parameters in the CLI and have not been validated\n";
         foreach my $line (@global_params) {
             my $decoded_line = decode_entities("$line");
             $genout_initial .= "$decoded_line\n";
@@ -108,28 +106,26 @@ EOM
     my @failover_name_list;
     my @failover_status_list;
 
-
-# get ip-addresses of all broadcast interfaces on system, later we'll 
-# then check that atleast one subnet is defined such that dhcp-server 
-# is listening on atleast one broadcast interface on the system
+    # get ip-addresses of all broadcast interfaces on system, later we'll
+    # then check that atleast one subnet is defined such that dhcp-server
+    # is listening on atleast one broadcast interface on the system
 
     use Vyatta::Misc;
     my @intf_ips = Vyatta::Misc::getInterfacesIPadresses("broadcast");
 
-# start with getting dhcp-server configuration from CLI
+    # start with getting dhcp-server configuration from CLI
     @names = $vcDHCP->listNodes();
-    if ( @names == 0 ) {
+    if (@names == 0) {
         print STDERR <<"EOM";
 No DHCP shared networks configured. 
 At least one DHCP shared network must be configured.
 EOM
         $error = 1;
-    }
-    else {
+    } else {
         foreach my $name (@names) {
+
             # skip shared-network if disabled
-            my $shared_ntwrk_disabled = $vcDHCP->exists(
-                        "$name disable");
+            my $shared_ntwrk_disabled = $vcDHCP->exists("$name disable");
 
             if (defined $shared_ntwrk_disabled) {
                 next;
@@ -138,42 +134,37 @@ EOM
             $genout .= "shared-network $name {\n";
 
             my @subnets = $vcDHCP->listNodes("$name subnet");
-            if ( @subnets == 0 ) {
+            if (@subnets == 0) {
                 print STDERR <<"EOM";
 No DHCP lease subnets configured for shared network name '$name'.
 At least one DHCP lease subnet must be configured for each shared network.
 EOM
                 $error = 1;
-            }
-            else {
+            } else {
 
-                   my $authoritative = $vcDHCP->returnValue(
-                      "$name authoritative");
-                   if ( $authoritative eq 'enable' ) {
-                       $genout .= "\tauthoritative;\n";
-                   }
-                   else {
-                       $genout .= "\tnot authoritative;\n";
-                   }
+                my $authoritative = $vcDHCP->returnValue("$name authoritative");
+                if ($authoritative eq 'enable') {
+                    $genout .= "\tauthoritative;\n";
+                } else {
+                    $genout .= "\tnot authoritative;\n";
+                }
 
-		   my @shared_network_params = $vcDHCP->returnValues(
-		      "$name shared-network-parameters");
-		   if ( @shared_network_params > 0 ) {
-		     $genout .= "# The following " . scalar @shared_network_params .
-" lines were added as shared-network-parameters in the CLI and have not been validated\n";
-		     foreach my $line (@shared_network_params) {
-           my $decoded_line = decode_entities("$line");
-           $genout .= "\t$decoded_line\n";
-		     }
-		   }
+                my @shared_network_params = $vcDHCP->returnValues("$name shared-network-parameters");
+                if (@shared_network_params > 0) {
+                    $genout .= "# The following " . scalar @shared_network_params ." lines were added as shared-network-parameters in the CLI and have not been validated\n";
+                    foreach my $line (@shared_network_params) {
+                        my $decoded_line = decode_entities("$line");
+                        $genout .= "\t$decoded_line\n";
+                    }
+                }
 
-                   if (@subnets > 1) {
-                   my $nets = join(', ', sort(@subnets));
-                   print STDOUT <<"EOM";
+                if (@subnets > 1) {
+                    my $nets = join(', ', sort(@subnets));
+                    print STDOUT <<"EOM";
 DHCP server warning: Multiple subnets configured under shared-network-name '$name'
 This implies that $nets share the same physical network
 EOM
-}
+                }
 
                 foreach my $subnet (@subnets) {
 
@@ -181,37 +172,31 @@ EOM
                     $all_subnets[$subnet_count] = $naipNetwork;
                     $subnet_count++;
 
-                    if ( defined($naipNetwork) ) {
+                    if (defined($naipNetwork)) {
 
                         $totalSubnetsLeased++;
 
                         foreach my $address (@intf_ips) {
-                                if (
-                                    doCheckIfAddressPLInsideNetwork(
-                                        $address, $naipNetwork
-                                    )
-                                  )
-                                {
-                                    $totalSubnetsMatched++;
-                                }
+                            if (doCheckIfAddressPLInsideNetwork($address, $naipNetwork)){
+                                $totalSubnetsMatched++;
+                            }
 
                         }
 
                         my $sub     = $naipNetwork->network()->addr();
                         my $netmask = $naipNetwork->mask();
                         my @startips_after_split = ();
-			my @stopips_after_split = ();
+                        my @stopips_after_split = ();
 
                         $genout .= "\tsubnet $sub netmask $netmask {\n";
 
-                        my @dns_servers = $vcDHCP->returnValues(
-                            "$name subnet $subnet dns-server");
-                        if ( @dns_servers > 0 ) {
+                        my @dns_servers = $vcDHCP->returnValues("$name subnet $subnet dns-server");
+                        if (@dns_servers > 0) {
                             $genout .= "\t\toption domain-name-servers ";
                             my $num = 0;
                             foreach my $dns_server (@dns_servers) {
-                                if ( $dns_server ne '' ) {
-                                    if ( $num > 0 ) {
+                                if ($dns_server ne '') {
+                                    if ($num > 0) {
                                         $genout .= ', ';
                                     }
                                     $genout .= "$dns_server";
@@ -221,14 +206,13 @@ EOM
                             $genout .= ";\n";
                         }
 
-                        my @domain_searches = $vcDHCP->returnValues(
-                            "$name subnet $subnet domain-search");
-                        if ( @domain_searches > 0 ) {
+                        my @domain_searches = $vcDHCP->returnValues("$name subnet $subnet domain-search");
+                        if (@domain_searches > 0) {
                             $genout .= "\t\toption domain-search ";
                             my $num = 0;
                             foreach my $domain_search (@domain_searches) {
-                                if ( $domain_search ne '' ) {
-                                    if ( $num > 0 ) {
+                                if ($domain_search ne '') {
+                                    if ($num > 0) {
                                         $genout .= ', ';
                                     }
                                     $genout .= "\"$domain_search\"";
@@ -238,14 +222,13 @@ EOM
                             $genout .= ";\n";
                         }
 
-                        my @ntp_servers = $vcDHCP->returnValues(
-                            "$name subnet $subnet ntp-server");
-                        if ( @ntp_servers > 0 ) {
+                        my @ntp_servers = $vcDHCP->returnValues("$name subnet $subnet ntp-server");
+                        if (@ntp_servers > 0) {
                             $genout .= "\t\toption ntp-servers ";
                             my $num = 0;
                             foreach my $ntp_server (@ntp_servers) {
-                                if ( $ntp_server ne '' ) {
-                                    if ( $num > 0 ) {
+                                if ($ntp_server ne '') {
+                                    if ($num > 0) {
                                         $genout .= ', ';
                                     }
                                     $genout .= "$ntp_server";
@@ -255,25 +238,22 @@ EOM
                             $genout .= ";\n";
                         }
 
-                        my @subnet_params = $vcDHCP->returnValues(
-                            "$name subnet $subnet subnet-parameters");
-                    	if ( @subnet_params > 0 ) {
-                            $genout .= "# The following " . scalar @subnet_params . 
-" lines were added as subnet-parameters in the CLI and have not been validated\n";
+                        my @subnet_params = $vcDHCP->returnValues("$name subnet $subnet subnet-parameters");
+                        if (@subnet_params > 0) {
+                            $genout .= "# The following " . scalar @subnet_params ." lines were added as subnet-parameters in the CLI and have not been validated\n";
                             foreach my $line (@subnet_params) {
-                              my $decoded_line = decode_entities("$line");
-                              $genout .= "\t\t$decoded_line\n";
+                                my $decoded_line = decode_entities("$line");
+                                $genout .= "\t\t$decoded_line\n";
                             }
                         }
 
-                        my @pop_servers = $vcDHCP->returnValues(
-                            "$name subnet $subnet pop-server");
-                        if ( @pop_servers > 0 ) {
+                        my @pop_servers = $vcDHCP->returnValues("$name subnet $subnet pop-server");
+                        if (@pop_servers > 0) {
                             $genout .= "\t\toption pop-server ";
                             my $num = 0;
                             foreach my $pop_server (@pop_servers) {
-                                if ( $pop_server ne '' ) {
-                                    if ( $num > 0 ) {
+                                if ($pop_server ne '') {
+                                    if ($num > 0) {
                                         $genout .= ', ';
                                     }
                                     $genout .= "$pop_server";
@@ -283,14 +263,13 @@ EOM
                             $genout .= ";\n";
                         }
 
-                        my @smtp_servers = $vcDHCP->returnValues(
-                            "$name subnet $subnet smtp-server");
-                        if ( @smtp_servers > 0 ) {
+                        my @smtp_servers = $vcDHCP->returnValues("$name subnet $subnet smtp-server");
+                        if (@smtp_servers > 0) {
                             $genout .= "\t\toption smtp-server ";
                             my $num = 0;
                             foreach my $smtp_server (@smtp_servers) {
-                                if ( $smtp_server ne '' ) {
-                                    if ( $num > 0 ) {
+                                if ($smtp_server ne '') {
+                                    if ($num > 0) {
                                         $genout .= ', ';
                                     }
                                     $genout .= "$smtp_server";
@@ -300,14 +279,13 @@ EOM
                             $genout .= ";\n";
                         }
 
-                        my @time_servers = $vcDHCP->returnValues(
-                            "$name subnet $subnet time-server");
-                        if ( @time_servers > 0 ) {
+                        my @time_servers = $vcDHCP->returnValues("$name subnet $subnet time-server");
+                        if (@time_servers > 0) {
                             $genout .= "\t\toption time-servers ";
                             my $num = 0;
                             foreach my $time_server (@time_servers) {
-                                if ( $time_server ne '' ) {
-                                    if ( $num > 0 ) {
+                                if ($time_server ne '') {
+                                    if ($num > 0) {
                                         $genout .= ', ';
                                     }
                                     $genout .= "$time_server";
@@ -317,14 +295,13 @@ EOM
                             $genout .= ";\n";
                         }
 
-                        my @wins_servers = $vcDHCP->returnValues(
-                            "$name subnet $subnet wins-server");
-                        if ( @wins_servers > 0 ) {
+                        my @wins_servers = $vcDHCP->returnValues("$name subnet $subnet wins-server");
+                        if (@wins_servers > 0) {
                             $genout .= "\t\toption netbios-name-servers ";
                             my $num_netbios = 0;
                             foreach my $wins_server (@wins_servers) {
-                                if ( $wins_server ne '' ) {
-                                    if ( $num_netbios > 0 ) {
+                                if ($wins_server ne '') {
+                                    if ($num_netbios > 0) {
                                         $genout .= ', ';
                                     }
                                     $genout .= "$wins_server";
@@ -334,210 +311,149 @@ EOM
                             $genout .= ";\n";
                         }
 
-                        my $destination_subnet =
-                          $vcDHCP->returnValue(
-"$name subnet $subnet static-route destination-subnet"
-                          );
-                        my $router_for_destination = $vcDHCP->returnValue(
-                            "$name subnet $subnet static-route router");
-                        if (   $destination_subnet ne ''
-                            && $router_for_destination ne '' )
+                        my $destination_subnet =$vcDHCP->returnValue("$name subnet $subnet static-route destination-subnet");
+                        my $router_for_destination = $vcDHCP->returnValue("$name subnet $subnet static-route router");
+                        if ($destination_subnet ne '' && $router_for_destination ne '')
                         {
-                            if ( $genout_initial_static_route_count == 0 ) {
-                                $genout_initial .=
-"option rfc3442-static-route code 121 = string;\n";
-                                $genout_initial .=
-"option windows-static-route code 249 = string;\n";
+                            if ($genout_initial_static_route_count == 0) {
+                                $genout_initial .="option rfc3442-static-route code 121 = string;\n";
+                                $genout_initial .="option windows-static-route code 249 = string;\n";
                                 $genout_initial_static_route_count = 1;
                             }
-                            my $slash_position =
-                              rindex( $destination_subnet, '/' ) + 1;
-                            my $destination_subnet_prefix =
-                              substr( $destination_subnet, $slash_position );
-                            my $destination_naipNetwork =
-                              new NetAddr::IP("$destination_subnet");
-                            my $sub        = $destination_naipNetwork->addr();
+                            my $slash_position = rindex($destination_subnet, '/') + 1;
+                            my $destination_subnet_prefix = substr($destination_subnet, $slash_position);
+                            my $destination_naipNetwork = new NetAddr::IP("$destination_subnet");
+                            my $sub = $destination_naipNetwork->addr();
                             my $hex_subnet = converttohex($sub);
-                            my $prefix_plus_subnet =
-                              prefix_and_subnet( $destination_subnet_prefix,
-                                $hex_subnet );
-                            my $router_naip =
-                              new NetAddr::IP("$router_for_destination");
+                            my $prefix_plus_subnet =prefix_and_subnet($destination_subnet_prefix,$hex_subnet);
+                            my $router_naip =new NetAddr::IP("$router_for_destination");
                             my $hex_router = converttohex($router_naip);
-
                             my $hex_route = $prefix_plus_subnet . $hex_router;
-                            $genout .=
-                              "\t\toption rfc3442-static-route $hex_route;\n";
-                            $genout .=
-                              "\t\toption windows-static-route $hex_route;\n";
-                        }
-                        elsif ($destination_subnet eq ''
-                            && $router_for_destination eq '' )
-                        {
-
-                    # do nothing, basically static-route has not been configured
-                        }
-                        else {
-			    print STDERR <<"EOM";
+                            
+                            $genout .="\t\toption rfc3442-static-route $hex_route;\n";
+                            $genout .="\t\toption windows-static-route $hex_route;\n";
+                        } elsif ($destination_subnet eq '' && $router_for_destination eq '') {
+                            # do nothing, basically static-route has not been configured
+                        } else {
+                            print STDERR <<"EOM";
 Please specify the missing DHCP static-route parameter:
 destination-subnet | router
 EOM
                             $error = 1;
                         }
 
-                        my $ip_forwarding = $vcDHCP->returnValue(
-                            "$name subnet $subnet ip-forwarding enable");
-                        if ( defined($ip_forwarding) ) {
-                            if ( $ip_forwarding eq 'true' ) {
+                        my $ip_forwarding = $vcDHCP->returnValue("$name subnet $subnet ip-forwarding enable");
+                        if (defined($ip_forwarding)) {
+                            if ($ip_forwarding eq 'true') {
                                 $genout .= "\t\toption ip-forwarding true;\n";
-                            }
-                            else {
+                            } else {
                                 $genout .= "\t\toption ip-forwarding false;\n";
                             }
                         }
 
-                        my $default_router = $vcDHCP->returnValue(
-                            "$name subnet $subnet default-router");
-                        if ( $default_router ne '' ) {
+                        my $default_router = $vcDHCP->returnValue("$name subnet $subnet default-router");
+                        if ($default_router ne '') {
                             $genout .= "\t\toption routers $default_router;\n";
                         }
 
-                        my $server_identifier = $vcDHCP->returnValue(
-                            "$name subnet $subnet server-identifier");
-                        if ( $server_identifier ne '' ) {
-                            $genout .=
-"\t\toption dhcp-server-identifier $server_identifier;\n";
+                        my $server_identifier = $vcDHCP->returnValue("$name subnet $subnet server-identifier");
+                        if ($server_identifier ne '') {
+                            $genout .="\t\toption dhcp-server-identifier $server_identifier;\n";
                         }
 
-                        my $domain_name = $vcDHCP->returnValue(
-                            "$name subnet $subnet domain-name");
-                        if ( $domain_name ne '' ) {
-                            $genout .=
-                              "\t\toption domain-name \"$domain_name\";\n";
+                        my $domain_name = $vcDHCP->returnValue("$name subnet $subnet domain-name");
+                        if ($domain_name ne '') {
+                            $genout .="\t\toption domain-name \"$domain_name\";\n";
                         }
 
-                        my $tftp_server_name = $vcDHCP->returnValue(
-                            "$name subnet $subnet tftp-server-name");
-                        if ( $tftp_server_name ne '' ) {
-                            $genout .=
-"\t\toption tftp-server-name \"$tftp_server_name\";\n";
+                        my $tftp_server_name = $vcDHCP->returnValue("$name subnet $subnet tftp-server-name");
+                        if ($tftp_server_name ne '') {
+                            $genout .="\t\toption tftp-server-name \"$tftp_server_name\";\n";
                         }
 
-                        my $bootfile_name = $vcDHCP->returnValue(
-                            "$name subnet $subnet bootfile-name");
-                        if ( $bootfile_name ne '' ) {
-                            $genout .=
-                              "\t\toption bootfile-name \"$bootfile_name\";\n" .
-                              "\t\tfilename \"$bootfile_name\";\n";
+                        my $bootfile_name = $vcDHCP->returnValue("$name subnet $subnet bootfile-name");
+                        if ($bootfile_name ne '') {
+                            $genout .="\t\toption bootfile-name \"$bootfile_name\";\n" ."\t\tfilename \"$bootfile_name\";\n";
                         }
 
-                        my $bootfile_server = $vcDHCP->returnValue(
-                            "$name subnet $subnet bootfile-server");
-                        if ( $bootfile_server ne '' ) {
-                            $genout .=
-                              "\t\tnext-server $bootfile_server;\n";
+                        my $bootfile_server = $vcDHCP->returnValue("$name subnet $subnet bootfile-server");
+                        if ($bootfile_server ne '') {
+                            $genout .="\t\tnext-server $bootfile_server;\n";
                         }
 
-                        my $time_offset = $vcDHCP->returnValue(
-                            "$name subnet $subnet time-offset");
-                        if ( $time_offset ne '' ) {
+                        my $time_offset = $vcDHCP->returnValue("$name subnet $subnet time-offset");
+                        if ($time_offset ne '') {
                             $genout .= "\t\toption time-offset $time_offset;\n";
                         }
 
-                        my $wpad_url =
-                          $vcDHCP->returnValue("$name subnet $subnet wpad-url");
-                        if ( $wpad_url ne '' ) {
-                            if ( $genout_initial_wpad_count == 0 ) {
-                                $genout_initial .=
-                                  "option wpad-url code 252 = text;\n\n";
+                        my $wpad_url =$vcDHCP->returnValue("$name subnet $subnet wpad-url");
+                        if ($wpad_url ne '') {
+                            if ($genout_initial_wpad_count == 0) {
+                                $genout_initial .="option wpad-url code 252 = text;\n\n";
                                 $genout_initial_wpad_count = 1;
                             }
                             $genout .= "\t\toption wpad-url \"$wpad_url\";\n";
                         }
 
-                        my $client_prefix_length = $vcDHCP->returnValue(
-                            "$name subnet $subnet client-prefix-length");
-                        if ( $client_prefix_length ne '' ) {
-                            my $naip2 = new NetAddr::IP(
-                                "255.255.255.255/$client_prefix_length");
+                        my $client_prefix_length = $vcDHCP->returnValue("$name subnet $subnet client-prefix-length");
+                        if ($client_prefix_length ne '') {
+                            my $naip2 = new NetAddr::IP("255.255.255.255/$client_prefix_length");
                             my $client_subnet_mask = $naip2->network()->addr();
-                            $genout .=
-                              "\t\toption subnet-mask $client_subnet_mask;\n";
+                            $genout .="\t\toption subnet-mask $client_subnet_mask;\n";
                         }
 
-                        my $lease =
-                          $vcDHCP->returnValue("$name subnet $subnet lease");
-                        if ( $lease ne '' ) {
+                        my $lease =$vcDHCP->returnValue("$name subnet $subnet lease");
+                        if ($lease ne '') {
                             $genout .= "\t\tdefault-lease-time $lease;\n";
                             $genout .= "\t\tmax-lease-time $lease;\n";
                         }
 
-                        my @ranges =
-                          $vcDHCP->listNodes("$name subnet $subnet start");
-                       
+                        my @ranges =$vcDHCP->listNodes("$name subnet $subnet start");
+
                         my $genout_failover_start = "";
                         my $genout_ranges = "";
                         my $write_failover_pool = "";
-                        my $failover_local_address = $vcDHCP->returnValue(
-                            "$name subnet $subnet failover local-address");
-                        my $failover_peer_address = $vcDHCP->returnValue(
-                            "$name subnet $subnet failover peer-address");
-                        my $failover_name = $vcDHCP->returnValue(
-                            "$name subnet $subnet failover name");
-                        my $failover_status = $vcDHCP->returnValue(
-                            "$name subnet $subnet failover status");
+                        my $failover_local_address = $vcDHCP->returnValue("$name subnet $subnet failover local-address");
+                        my $failover_peer_address = $vcDHCP->returnValue("$name subnet $subnet failover peer-address");
+                        my $failover_name = $vcDHCP->returnValue("$name subnet $subnet failover name");
+                        my $failover_status = $vcDHCP->returnValue("$name subnet $subnet failover status");
 
-                        if (   $failover_local_address ne ''
-                            && $failover_peer_address ne ''
-                            && $failover_name         ne ''
-                            && $failover_status       ne '' )
-                        {
-                           my $is_there = 0;
-                           foreach my $elt (@failover_name_list) {
-                               if ($elt eq $failover_name) {
-                                   $is_there = 1;
-                                   last;
-                               }
-                           }
-                           if ($is_there == 0) {
-                            if (@ranges > 0) {
-                              $failover_subnets = $failover_subnets + 1;
-                              $failover_local_address_list[$failover_subnets] =
-                                $failover_local_address;
-                              $failover_peer_address_list[$failover_subnets] =
-                                $failover_peer_address;
-                              $failover_name_list[$failover_subnets] =
-                                $failover_name;
-                              $failover_status_list[$failover_subnets] =
-                                $failover_status;
-                              $write_failover_pool = "\t";
-                              $genout_failover_start .= "\t\tpool {\n";
-			      # need to write ranges under a pool when configuring failover
-                              $genout_failover_start .=
-                                "\t\t\tfailover peer \"$failover_name\";\n";
-                              $genout_failover_start .= "\t\t\tdeny dynamic bootp clients;\n";
-                            } else {
-                                   print STDERR <<"EOM";
+                        if ($failover_local_address ne '' && $failover_peer_address ne ''&& $failover_name ne ''&& $failover_status ne '') {
+                            my $is_there = 0;
+                            foreach my $elt (@failover_name_list) {
+                                if ($elt eq $failover_name) {
+                                    $is_there = 1;
+                                    last;
+                                }
+                            }
+                            if ($is_there == 0) {
+                                if (@ranges > 0) {
+                                    $failover_subnets = $failover_subnets + 1;
+                                    $failover_local_address_list[$failover_subnets] =$failover_local_address;
+                                    $failover_peer_address_list[$failover_subnets] =$failover_peer_address;
+                                    $failover_name_list[$failover_subnets] =$failover_name;
+                                    $failover_status_list[$failover_subnets] =$failover_status;
+                                    $write_failover_pool = "\t";
+                                    $genout_failover_start .= "\t\tpool {\n";
+
+                                    # need to write ranges under a pool when configuring failover
+                                    $genout_failover_start .="\t\t\tfailover peer \"$failover_name\";\n";
+                                    $genout_failover_start .= "\t\t\tdeny dynamic bootp clients;\n";
+                                } else {
+                                    print STDERR <<"EOM";
 Atleast one start-stop range must be configured for $subnet to set up DHCP failover
 EOM
-                            $error = 1;
-                            }
-                           } else {
-                                   print STDERR <<"EOM";
+                                    $error = 1;
+                                }
+                            } else {
+                                print STDERR <<"EOM";
 Failover names should be unique: '$failover_name' has already been configured
 EOM
-                            $error = 1;
-                           }
-                        }
-                        elsif ($failover_local_address eq ''
-                            && $failover_peer_address eq ''
-                            && $failover_name         eq ''
-                            && $failover_status       eq '' )
-                        {
-
-                        # do nothing, basically failover has not been configured
-                        }
-                        else {
+                                $error = 1;
+                            }
+                        } elsif ($failover_local_address eq ''&& $failover_peer_address eq ''&& $failover_name eq ''&& $failover_status eq '') {
+                            # do nothing, basically failover has not been configured
+                        } else {
                             print STDERR <<"EOM";
 Please set one or more of the missing DHCP failover parameters:
 local-address | peer-address | name | status
@@ -548,24 +464,22 @@ EOM
                         my @naip_conflict_start;
                         my @naip_conflict_stop;
                         my @zero_to_ranges;
-                        my $range_conflict_error = 1
-                          ; #prevents showing range conflict errors if basic errors for start-stop occur as well
+                        my $range_conflict_error = 1; #prevents showing range conflict errors if basic errors for start-stop occur as well
                         my $ranges_stop_count = 0;
                         my @ranges_stop;
-                        if ( @ranges == 0 ) {
+                        if (@ranges == 0) {
                             $range_conflict_error = 0;
-			my @exclude_ips = $vcDHCP->returnValues("$name subnet $subnet exclude");
-                         if (@exclude_ips > 0) {
-                          print STDERR <<"EOM";
+                            my @exclude_ips = $vcDHCP->returnValues("$name subnet $subnet exclude");
+                            if (@exclude_ips > 0) {
+                                print STDERR <<"EOM";
 Atleast one start-stop range must be configured for $subnet to exclude IP
 EOM
-                          $error = 1;
-                         }
-                        }
-                        else {
+                                $error = 1;
+                            }
+                        } else {
                             foreach my $start (@ranges) {
                                 my $naipStart = new NetAddr::IP($start);
-                                if ( !$naipStart->within($naipNetwork) ) {
+                                if (!$naipStart->within($naipNetwork)) {
                                     print STDERR <<"EOM";
 Start DHCP lease IP '$start' is outside of the DHCP lease network '$subnet'
 under shared network '$name'.
@@ -573,11 +487,10 @@ EOM
                                     $error                = 1;
                                     $range_conflict_error = 0;
                                 }
-                                my $stop = $vcDHCP->returnValue(
-                                    "$name subnet $subnet start $start stop");
-                                if ( defined $stop ) {
+                                my $stop = $vcDHCP->returnValue("$name subnet $subnet start $start stop");
+                                if (defined $stop) {
                                     my $naipStop = new NetAddr::IP($stop);
-                                    if ( !$naipStop->within($naipNetwork) ) {
+                                    if (!$naipStop->within($naipNetwork)) {
                                         print STDERR <<"EOM";
 Stop DHCP lease IP '$stop' is outside of the DHCP lease network '$subnet'
 under shared network '$name'.
@@ -585,7 +498,7 @@ EOM
                                         $error                = 1;
                                         $range_conflict_error = 0;
                                     }
-                                    if ( $naipStop < $naipStart ) {
+                                    if ($naipStop < $naipStart) {
                                         print STDERR <<"EOM";
 Stop DHCP lease IP '$stop' should be an address equal to or later 
 than the Start DHCP lease IP '$start'
@@ -595,161 +508,131 @@ EOM
                                     }
                                     $ranges_stop[$ranges_stop_count] = $stop;
                                     $ranges_stop_count++;
-                                }
-                                else {
-                                    print STDERR
-"Stop DHCP lease IP not defined for Start DHCP lease IP '$start'\n";
+                                } else {
+                                    print STDERR "Stop DHCP lease IP not defined for Start DHCP lease IP '$start'\n";
                                     $error                = 1;
                                     $range_conflict_error = 0;
                                 }
                             }
 
-                        my $range_count;
-                        if ($range_conflict_error) {
-                            my $start_count = 0;
-                            my $stop_count  = 0;
-                            foreach my $conflict_start (@ranges) {
-                                $naip_conflict_start[$start_count] =
-                                  new NetAddr::IP($conflict_start);
-                                $start_count++;
-                            }
-                            foreach my $conflict_stop (@ranges_stop) {
-                                $naip_conflict_stop[$stop_count] =
-                                  new NetAddr::IP($conflict_stop);
-                                $stop_count++;
-                            }
-                            $range_count    = scalar(@ranges) - 1;
-                            @zero_to_ranges = ( 0 .. $range_count );
-                            for my $i (@zero_to_ranges) {
-                                for my $j (@zero_to_ranges) {
-                                    if ( $i == $j ) {
-                                        next;
-                                    }
-                                    else {
-                                        if (
-                                            (
-                                                $naip_conflict_start[$j] <=
-                                                $naip_conflict_start[$i]
-                                            )
-                                            and ( $naip_conflict_start[$i] <=
-                                                $naip_conflict_stop[$j] )
-                                          )
-                                        {
-                                            print STDERR <<"EOM";
+                            my $range_count;
+                            if ($range_conflict_error) {
+                                my $start_count = 0;
+                                my $stop_count  = 0;
+                                foreach my $conflict_start (@ranges) {
+                                    $naip_conflict_start[$start_count] =new NetAddr::IP($conflict_start);
+                                    $start_count++;
+                                }
+                                foreach my $conflict_stop (@ranges_stop) {
+                                    $naip_conflict_stop[$stop_count] =new NetAddr::IP($conflict_stop);
+                                    $stop_count++;
+                                }
+                                $range_count    = scalar(@ranges) - 1;
+                                @zero_to_ranges = (0 .. $range_count);
+                                for my $i (@zero_to_ranges) {
+                                    for my $j (@zero_to_ranges) {
+                                        if ($i == $j) {
+                                            next;
+                                        } else {
+                                            if (($naip_conflict_start[$j] <=$naip_conflict_start[$i]) and ($naip_conflict_start[$i] <=$naip_conflict_stop[$j])) {
+                                                print STDERR <<"EOM";
 Conflicting DHCP lease ranges: Start IP '$ranges[$i]'
 lies in DHCP lease range '$ranges[$j]'-'$ranges_stop[$j]'.
 EOM
-                                            $error = 1;
-                                        }
-                                        elsif (
-                                            (
-                                                $naip_conflict_start[$j] <=
-                                                $naip_conflict_stop[$i]
-                                            )
-                                            and ( $naip_conflict_stop[$i] <=
-                                                $naip_conflict_stop[$j] )
-                                          )
-                                        {
-                                            print STDERR <<"EOM";
+                                                $error = 1;
+                                            } elsif (($naip_conflict_start[$j] <=$naip_conflict_stop[$i]) and ($naip_conflict_stop[$i] <=$naip_conflict_stop[$j])) {
+                                                print STDERR <<"EOM";
 Conflicting DHCP lease ranges: Stop IP '$ranges_stop[$i]' 
 lies in DHCP lease range '$ranges[$j]'-'$ranges_stop[$j]'.
 EOM
+                                                $error = 1;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            @startips_after_split = @ranges;
+                            @stopips_after_split = @ranges_stop;
+
+                            if ($error == 0) {
+                                my @exclude_ips = $vcDHCP->returnValues("$name subnet $subnet exclude");
+                                if (@exclude_ips > 0) {
+
+                                    # do a check that all these exclude ips are inside the subnet
+                                    foreach my $each_exclude_ip (@exclude_ips) {
+
+                                        my $naipexcludeip = new NetAddr::IP($each_exclude_ip);
+                                        if (!$naipexcludeip->within($naipNetwork)) {
+                                            my $naipexcludeip_addr = $naipexcludeip->addr();
+                                            print STDERR <<"EOM";
+Exclude IP '$naipexcludeip_addr' is outside of the DHCP lease network 
+'$subnet' under shared network '$name'.
+EOM
                                             $error = 1;
                                         }
+                                    }
+
+                                    if ($error == 0) {
+                                        $exclude_ips_count = scalar(@exclude_ips);
+                                        $split_for_static_ip = 0;
+                                        my ($split_ranges_start_ref, $split_ranges_stop_ref) = split_ranges(@ranges, @ranges_stop, @exclude_ips);
+                                        @startips_after_split = @$split_ranges_start_ref;
+                                        @stopips_after_split = @$split_ranges_stop_ref;
+                                        my $split_range_count = scalar(@startips_after_split)-1;
+                                        my @zero_to_split_ranges = (0 .. $split_range_count);
+                                        for my $split_range_ips (@zero_to_split_ranges) {
+                                            $genout_ranges .= $write_failover_pool;
+                                            $genout_ranges .="\t\trange $startips_after_split[$split_range_ips] $stopips_after_split[$split_range_ips];\n";
+                                        }
+                                    }
+                                } else {
+
+                                    # write all the ranges as you got em
+                                    for my $range_ips (@zero_to_ranges) {
+                                        $genout_ranges .= $write_failover_pool;
+                                        $genout_ranges .="\t\trange $ranges[$range_ips] $ranges_stop[$range_ips];\n";
                                     }
                                 }
                             }
                         }
 
-                       @startips_after_split = @ranges;
-                       @stopips_after_split = @ranges_stop;
-
-                      if ($error == 0) {
-		       my @exclude_ips = $vcDHCP->returnValues("$name subnet $subnet exclude");
-                       if (@exclude_ips > 0) {
-                       # do a check that all these exclude ips are inside the subnet
-                        foreach my $each_exclude_ip (@exclude_ips) {
-
-                         my $naipexcludeip = new NetAddr::IP($each_exclude_ip);
-                         if (!$naipexcludeip->within($naipNetwork)) {
-                          my $naipexcludeip_addr = $naipexcludeip->addr();
-			  print STDERR <<"EOM";
-Exclude IP '$naipexcludeip_addr' is outside of the DHCP lease network 
-'$subnet' under shared network '$name'.
-EOM
-                          $error = 1;
-                         }
+                        my $genout_failover_end = "";
+                        if (!($write_failover_pool eq "")) {
+                            $genout_failover_end .= "\t\t}\n";   # end of pool
                         }
 
-                       if ($error == 0) {
-                        $exclude_ips_count = scalar(@exclude_ips);
-                        $split_for_static_ip = 0;
-			my ($split_ranges_start_ref, $split_ranges_stop_ref) = split_ranges (@ranges, @ranges_stop, @exclude_ips);
-                        @startips_after_split = @$split_ranges_start_ref;
-                        @stopips_after_split = @$split_ranges_stop_ref;
-                        my $split_range_count = scalar(@startips_after_split)-1;
-                        my @zero_to_split_ranges = (0 .. $split_range_count);
-                        for my $split_range_ips (@zero_to_split_ranges) {
-			 $genout_ranges .= $write_failover_pool;
-			 $genout_ranges .=
-			  "\t\trange $startips_after_split[$split_range_ips] $stopips_after_split[$split_range_ips];\n";
-                        }
-                       }
-                      } else {
-                         # write all the ranges as you got em
-                         for my $range_ips (@zero_to_ranges) {
-                          $genout_ranges .= $write_failover_pool;
-                          $genout_ranges .=  
-			   "\t\trange $ranges[$range_ips] $ranges_stop[$range_ips];\n";
-                         }
-                       }
-                      }
-                    }
-          
-                    my $genout_failover_end = "";
-                    if (!($write_failover_pool eq "")) {
-                        $genout_failover_end .= "\t\t}\n";   # end of pool
-                    }
+                        my @static_mapping = $vcDHCP->listNodes("$name subnet $subnet static-mapping");
 
-                        my @static_mapping = $vcDHCP->listNodes(
-                            "$name subnet $subnet static-mapping");
-
-			my $mapping_cnt = 0;
-			foreach my $static_mapping (@static_mapping) {
-                            my $mapping_disabled =
-                                $vcDHCP->exists(
-"$name subnet $subnet static-mapping $static_mapping disable"
-                              );
+                        my $mapping_cnt = 0;
+                        foreach my $static_mapping (@static_mapping) {
+                            my $mapping_disabled =$vcDHCP->exists("$name subnet $subnet static-mapping $static_mapping disable");
 
                             if (defined $mapping_disabled) {
+
                                 # remove disabled static-mapping from array
                                 delete $static_mapping[$mapping_cnt];
-                            } 
+                            }
                             $mapping_cnt++;
                         }
 
-                        if ( @static_mapping == 0 && @ranges == 0 ) {
-                            print STDERR
-"No DHCP start-stop range or active static-mapping set for subnet $subnet\n";
-                            $error                = 1;
+                        if (@static_mapping == 0 && @ranges == 0) {
+                            print STDERR "No DHCP start-stop range or active static-mapping set for subnet $subnet\n";
+                            $error = 1;
                         }
 
                         foreach my $static_mapping (@static_mapping) {
-			    next if !defined $static_mapping;
-                            my $ip_address =
-                              $vcDHCP->returnValue(
-"$name subnet $subnet static-mapping $static_mapping ip-address"
-                              );
-                            if ( !defined($ip_address) || $ip_address eq '' ) {
+                            next if !defined $static_mapping;
+                            my $ip_address =$vcDHCP->returnValue("$name subnet $subnet static-mapping $static_mapping ip-address");
+                            if (!defined($ip_address) || $ip_address eq '') {
                                 print STDERR <<"EOM";
 No static DHCP lease IP address specified for static mapping '$static_mapping'
 under shared network name '$name'.
 EOM
                                 $error = 1;
-                            }
-                            else {
+                            } else {
                                 my $naipIP = new NetAddr::IP($ip_address);
-                                if ( !$naipIP->within($naipNetwork) ) {
+                                if (!$naipIP->within($naipNetwork)) {
                                     print STDERR <<"EOM";
 Static DHCP lease IP '$ip_address' under static mapping '$static_mapping'
 under shared network name '$name' is outside of the DHCP lease network '$subnet'.
@@ -759,77 +642,61 @@ EOM
                                 my $ip_in_range = 0;
                                 my $equals_exclude_ip=0;
                                 for my $i (@zero_to_ranges) {
-                                    if ( ( $naip_conflict_start[$i] <= $naipIP )
-                                        and
-                                        ( $naipIP <= $naip_conflict_stop[$i] ) )
-                                    {
+                                    if (($naip_conflict_start[$i] <= $naipIP) and($naipIP <= $naip_conflict_stop[$i])) {
                                         $ip_in_range = 1;
                                     }
                                 }
                                 if ($ip_in_range == 1) {
                                     my @exclude_ips = $vcDHCP->returnValues("$name subnet $subnet exclude");
                                     foreach my $exclude_ip (@exclude_ips) {
-                                       if ($ip_address eq $exclude_ip) {
-                                           $equals_exclude_ip=1;
-                                       }
+                                        if ($ip_address eq $exclude_ip) {
+                                            $equals_exclude_ip=1;
+                                        }
                                     }
                                     if ($equals_exclude_ip == 0){
 
-# we are in part of code where we have checked that static-ip does not 
-# match any exclude ip in this subnet, so split ranges to remove this
-# static IP from start-stop ranges configured for this subnet
+                                        # we are in part of code where we have checked that static-ip does not
+                                        # match any exclude ip in this subnet, so split ranges to remove this
+                                        # static IP from start-stop ranges configured for this subnet
 
-                                     $split_for_static_ip = 1;
-                                     my @static_ip = ($ip_address);
-# need to generate new ranges so empty previously stored ranges string
-                                     $genout_ranges = "";
+                                        $split_for_static_ip = 1;
+                                        my @static_ip = ($ip_address);
 
-                                     my ($split_ranges_start_ref, $split_ranges_stop_ref) = 
-                                     split_ranges (@startips_after_split, @stopips_after_split, @static_ip);
-                                     @startips_after_split = @$split_ranges_start_ref;
-                                     @stopips_after_split = @$split_ranges_stop_ref;
-                                     my $split_range_count = scalar(@startips_after_split)-1;
-                                     my @zero_to_split_ranges = (0 .. $split_range_count);
-                                     for my $split_range_ips (@zero_to_split_ranges) {
-                                      $genout_ranges .= $write_failover_pool;
-                                      $genout_ranges .=
-                                      "\t\trange $startips_after_split[$split_range_ips] $stopips_after_split[$split_range_ips];\n";
-                                     }
+                                        # need to generate new ranges so empty previously stored ranges string
+                                        $genout_ranges = "";
 
+                                        my ($split_ranges_start_ref, $split_ranges_stop_ref) = split_ranges(@startips_after_split, @stopips_after_split, @static_ip);
+                                        @startips_after_split = @$split_ranges_start_ref;
+                                        @stopips_after_split = @$split_ranges_stop_ref;
+                                        my $split_range_count = scalar(@startips_after_split)-1;
+                                        my @zero_to_split_ranges = (0 .. $split_range_count);
+                                        for my $split_range_ips (@zero_to_split_ranges) {
+                                            $genout_ranges .= $write_failover_pool;
+                                            $genout_ranges .="\t\trange $startips_after_split[$split_range_ips] $stopips_after_split[$split_range_ips];\n";
+                                        }
 
                                     }
                                 }
                             }
 
-                            my $mac_address =
-                              $vcDHCP->returnValue(
-"$name subnet $subnet static-mapping $static_mapping mac-address"
-                              );
-                            if ( !defined($mac_address) || $mac_address eq '' )
-                            {
+                            my $mac_address =$vcDHCP->returnValue("$name subnet $subnet static-mapping $static_mapping mac-address");
+                            if (!defined($mac_address) || $mac_address eq ''){
                                 print STDERR <<"EOM";
 No static DHCP lease mac address specified for static mapping '$static_mapping'
 under shared network name '$name'.
 EOM
                                 $error = 1;
                             }
-                            if (   defined($ip_address)
-                                && $ip_address ne ''
-                                && defined($mac_address)
-                                && $mac_address ne '' )
-                            {
+                            if (defined($ip_address) && $ip_address ne '' && defined($mac_address) && $mac_address ne '') {
                                 my $prefix = $name."_";
                                 $genout .= "\t\thost $prefix$static_mapping {\n";
                                 $genout .= "\t\t\tfixed-address $ip_address;\n";
-                                $genout .=
-                                  "\t\t\thardware ethernet $mac_address;\n";
-                                my @static_mapping_params = $vcDHCP->returnValues(
-                                    "$name subnet $subnet static-mapping $static_mapping static-mapping-parameters");
-                            	if ( @static_mapping_params > 0 ) {
-                                    $genout .= "# The following " . scalar @static_mapping_params . 
-" lines were added as static-mapping-parameters in the CLI and have not been validated\n";
+                                $genout .="\t\t\thardware ethernet $mac_address;\n";
+                                my @static_mapping_params = $vcDHCP->returnValues("$name subnet $subnet static-mapping $static_mapping static-mapping-parameters");
+                                if (@static_mapping_params > 0) {
+                                    $genout .= "# The following ". scalar @static_mapping_params ." lines were added as static-mapping-parameters in the CLI and have not been validated\n";
                                     foreach my $line (@static_mapping_params) {
-                                        if ( $line =~ /^filename +(.+);$/ ) {
+                                        if ($line =~ /^filename +(.+);$/) {
                                             $line = "filename \"$1\";";
                                         }
                                         my $decoded_line = decode_entities("$line");
@@ -843,21 +710,21 @@ EOM
                         $genout .= $genout_failover_start . $genout_ranges . $genout_failover_end;
                         $genout .= "\t}\n";
 
-# if failover is configured then there needs to be a dynamic range or else 
-# dhcpd will exit with an error on reading dhcpd.conf
-# check here that there is still a dynamic range present after splits 
-# for exclude IPs and static-mappings if failover configured for this subnet
+                        # if failover is configured then there needs to be a dynamic range or else
+                        # dhcpd will exit with an error on reading dhcpd.conf
+                        # check here that there is still a dynamic range present after splits
+                        # for exclude IPs and static-mappings if failover configured for this subnet
 
                         if (!($genout_failover_start eq "")) {
-                          if (@startips_after_split == 0) {
+                            if (@startips_after_split == 0) {
                                 print STDERR <<"EOM";
 DHCP server error: All IP addresses defined in start-stop ranges under 
 'shared-network-name $name subnet $subnet' have either been excluded 
 or assigned using 'static-mapping'. To configure DHCP failover there 
 needs to be atleast one IP address that is to be assigned dynamically.
 EOM
-                                $error = 1;                            
-                          }
+                                $error = 1;
+                            }
                         }
 
                     }
@@ -867,20 +734,17 @@ EOM
         }
     }
 
-    if ( $failover_subnets >= 0 ) {
-        my @zero_to_failover_subnets = ( 0 .. $failover_subnets );
+    if ($failover_subnets >= 0) {
+        my @zero_to_failover_subnets = (0 .. $failover_subnets);
         for my $failover (@zero_to_failover_subnets) {
-            if ( $failover_status_list[$failover] eq 'primary' ) {
+            if ($failover_status_list[$failover] eq 'primary') {
 
                 # add stuff for primary DHCP server
-                $genout_failover .=
-                  "failover peer \"$failover_name_list[$failover]\" {\n";
+                $genout_failover .="failover peer \"$failover_name_list[$failover]\" {\n";
                 $genout_failover .= "primary;\n";
-                $genout_failover .=
-                  "address $failover_local_address_list[$failover];\n";
+                $genout_failover .="address $failover_local_address_list[$failover];\n";
                 $genout_failover .= "port 520;\n";
-                $genout_failover .=
-                  "peer address $failover_peer_address_list[$failover];\n";
+                $genout_failover .="peer address $failover_peer_address_list[$failover];\n";
                 $genout_failover .= "peer port 520;\n";
                 $genout_failover .= "max-response-delay 30;\n";
                 $genout_failover .= "max-unacked-updates 10;\n";
@@ -889,18 +753,14 @@ EOM
                 $genout_failover .= "split 128;\n";
                 $genout_failover .= "}\n";
 
-            }
-            elsif ( $failover_status_list[$failover] eq 'secondary' ) {
+            } elsif ($failover_status_list[$failover] eq 'secondary') {
 
                 # add stuff for secondary DHCP server
-                $genout_failover .=
-                  "failover peer \"$failover_name_list[$failover]\" {\n";
+                $genout_failover .="failover peer \"$failover_name_list[$failover]\" {\n";
                 $genout_failover .= "secondary;\n";
-                $genout_failover .=
-                  "address $failover_local_address_list[$failover];\n";
+                $genout_failover .="address $failover_local_address_list[$failover];\n";
                 $genout_failover .= "port 520;\n";
-                $genout_failover .=
-                  "peer address $failover_peer_address_list[$failover];\n";
+                $genout_failover .="peer address $failover_peer_address_list[$failover];\n";
                 $genout_failover .= "peer port 520;\n";
                 $genout_failover .= "max-response-delay 30;\n";
                 $genout_failover .= "max-unacked-updates 10;\n";
@@ -911,16 +771,14 @@ EOM
         }
     }
 
-    my @zero_to_subnet_count = ( 0 .. ( $subnet_count - 1 ) );
+    my @zero_to_subnet_count = (0 .. ($subnet_count - 1));
     for my $iloop (@zero_to_subnet_count) {
         for my $jloop (@zero_to_subnet_count) {
-            if ( $iloop == $jloop ) {
+            if ($iloop == $jloop) {
                 next;
-            }
-            else {
-                if ( $all_subnets[$jloop]->within( $all_subnets[$iloop] ) ) {
-                    print STDERR
-"Conflicting subnet ranges: $all_subnets[$jloop] overlaps $all_subnets[$iloop]\n";
+            } else {
+                if ($all_subnets[$jloop]->within($all_subnets[$iloop])) {
+                    print STDERR "Conflicting subnet ranges: $all_subnets[$jloop] overlaps $all_subnets[$iloop]\n";
                     $error = 1;
                 }
 
@@ -928,7 +786,7 @@ EOM
         }
     }
 
-    if ( $totalSubnetsLeased > 0 && $totalSubnetsMatched == 0 ) {
+    if ($totalSubnetsLeased > 0 && $totalSubnetsMatched == 0) {
         print STDERR <<"EOM";
 DHCP server error: None of the DHCP lease subnets are inside any of the subnets
 configured on broadcast interfaces. At least one DHCP lease subnet must be set
@@ -938,48 +796,46 @@ EOM
     }
 
     if ($error) {
-        print STDERR
-          "DHCP server configuration commit aborted due to error(s).\n";
+        print STDERR "DHCP server configuration commit aborted due to error(s).\n";
         exit(1);
     }
     $genout = $genout_initial . $genout_failover . $genout;
 }
 
 my $output;
-if ( $out ) {
+if ($out) {
     open $output, '>', $out
-	or die "Can't open $out : $!";
+        or die "Can't open $out : $!";
     select $output;
 }
 
 print $genout;
 select STDOUT;
 
-close $output if ( $output );
+close $output if ($output);
 
-if ( $init ) {
-    if ( @names == 0 || $disabled ) {
+if ($init) {
+    if (@names == 0 || $disabled) {
         exec "$init stop";
-    }
-    else {
+    } else {
         exec "$init restart";
     }
 }
 
 sub doCheckIfAddressPLInsideNetwork {
-    my ( $address, $naipNetwork ) = @_;
+    my ($address, $naipNetwork) = @_;
 
-    if ( !defined($address) || !defined($naipNetwork) ) {
+    if (!defined($address) || !defined($naipNetwork)) {
         return 0;
     }
 
     my $naipSM = new NetAddr::IP($address);
-    if ( defined($naipSM) ) {
+    if (defined($naipSM)) {
 
         my $subnetIA = $naipSM->network()->addr();
-        my $naipIA = new NetAddr::IP( $subnetIA, $naipSM->masklen() );
+        my $naipIA = new NetAddr::IP($subnetIA, $naipSM->masklen());
 
-        if ( defined($naipIA) && $naipNetwork->within($naipIA) ) {
+        if (defined($naipIA) && $naipNetwork->within($naipIA)) {
             return 1;
         }
     }
@@ -995,12 +851,12 @@ sub converttohex {
     my @decimal_numbers;
     my $hex_string;
 
-    for my $i ( 0 .. 3 ) {
-        $dot_indices[$i] = index( $ipv4_address, $dot_char );
-        $decimal_numbers[$i] = substr( $ipv4_address, 0, $dot_indices[$i] );
-        $ipv4_address = substr( $ipv4_address, $dot_indices[$i] + 1 );
-        $hex_string .= sprintf( "%02x", $decimal_numbers[$i] );
-        if ( $i != 3 ) {
+    for my $i (0 .. 3) {
+        $dot_indices[$i] = index($ipv4_address, $dot_char);
+        $decimal_numbers[$i] = substr($ipv4_address, 0, $dot_indices[$i]);
+        $ipv4_address = substr($ipv4_address, $dot_indices[$i] + 1);
+        $hex_string .= sprintf("%02x", $decimal_numbers[$i]);
+        if ($i != 3) {
             $hex_string .= ":";
         }
 
@@ -1010,28 +866,24 @@ sub converttohex {
 }
 
 sub prefix_and_subnet {
-    my ( $prefix, $subnet ) = @_;
-    my $hex_prefix .= sprintf( "%02x", $prefix );
+    my ($prefix, $subnet) = @_;
+    my $hex_prefix .= sprintf("%02x", $prefix);
     my $prefix_subnet_string = "";
 
-    if ( $prefix == 0 ) {
+    if ($prefix == 0) {
 
         # do nothing as this needs to be an empty string
 
-    }
-    elsif ( ( $prefix >= 1 ) && ( $prefix <= 8 ) ) {
-        $prefix_subnet_string = $hex_prefix . ":" . substr( $subnet, 0, 3 );
+    } elsif (($prefix >= 1) && ($prefix <= 8)) {
+        $prefix_subnet_string = $hex_prefix . ":" . substr($subnet, 0, 3);
 
-    }
-    elsif ( ( $prefix >= 9 ) && ( $prefix <= 16 ) ) {
-        $prefix_subnet_string = $hex_prefix . ":" . substr( $subnet, 0, 6 );
+    } elsif (($prefix >= 9) && ($prefix <= 16)) {
+        $prefix_subnet_string = $hex_prefix . ":" . substr($subnet, 0, 6);
 
-    }
-    elsif ( ( $prefix >= 17 ) && ( $prefix <= 24 ) ) {
-        $prefix_subnet_string = $hex_prefix . ":" . substr( $subnet, 0, 9 );
+    } elsif (($prefix >= 17) && ($prefix <= 24)) {
+        $prefix_subnet_string = $hex_prefix . ":" . substr($subnet, 0, 9);
 
-    }
-    elsif ( ( $prefix >= 25 ) && ( $prefix <= 32 ) ) {
+    } elsif (($prefix >= 25) && ($prefix <= 32)) {
         $prefix_subnet_string = $hex_prefix . ":" . $subnet . ":";
     }
 
@@ -1043,112 +895,113 @@ sub prefix_and_subnet {
 # when a static-mapping is given an IP that exists in one of the defined start-stop ranges
 # when called to split ranges from static-mappings part of code, variable $split_for_static_ip
 # is set to 1 so that code exclusive to excluding IP addresses is not executed in function
-# note: when $split_for_static_ip!=0 it also serves to calculate indices of 
+# note: when $split_for_static_ip!=0 it also serves to calculate indices of
 #       passed arrays else $exclude_ips_count is used for the same purpose
 
 sub split_ranges {
- my (@all_ips) = @_;
+    my (@all_ips) = @_;
 
- my $all_ips_count = scalar(@all_ips);
- my $exclude_ips_index;
- if ($split_for_static_ip == 0) {
-    $exclude_ips_index = $all_ips_count - $exclude_ips_count;
- } else {
-    $exclude_ips_index = $all_ips_count - $split_for_static_ip;
- }
- my $stop_ips_index = $exclude_ips_index/2;
- my @start_ips;
- my @stop_ips;
- my @exclude_ips;
-
- my $stop_count;
- my $exclude_count;
- my $exclude_not_in_ranges;
- 
- for my $temp_count (0 .. ($stop_ips_index-1)){
-  $start_ips[$temp_count] = $all_ips[$temp_count];
- }
-
- for my $temp_count ($stop_ips_index .. ($exclude_ips_index-1)){
-  $stop_ips[$stop_count] = $all_ips[$temp_count];
-  $stop_count = $stop_count + 1;
- }
-
- for my $temp_count ($exclude_ips_index .. ($all_ips_count-1)){
-  $exclude_ips[$exclude_count] = $all_ips[$temp_count];
-  $exclude_count = $exclude_count + 1;
- }
-
- @exclude_ips = sort(@exclude_ips);
- for my $excludeip (@exclude_ips) {
-  
-  $exclude_not_in_ranges = 1;
-  my $naipexcludeip = new NetAddr::IP($excludeip);
-  my $range_count = scalar(@start_ips)-1;
-  my @zero_to_ranges = (0 .. $range_count);
-  for my $count (@zero_to_ranges){
-   
-   my $naipstartip = new NetAddr::IP($start_ips[$count]);
-   my $naipstopip = new NetAddr::IP($stop_ips[$count]);
-   if (($naipstartip <= $naipexcludeip) && ($naipexcludeip <= $naipstopip)){
-    $exclude_not_in_ranges = 0;
-    if ($naipstartip == $naipexcludeip){
-     
-     my $new_naipstartip = new NetAddr::IP ($start_ips[$count], '0.0.0.0') + 1;
-     # need to add prefix '/0' in the above statement as default for ip addresses: '/32' 
-     # does not work in constant addition operator this should work correctly as we 
-     # already make sure the start, stop and exclude ips are within the subnet
-     $start_ips[$count] = $new_naipstartip->addr();
-    } elsif ($naipexcludeip == $naipstopip) {
-       
-       my $new_naipstopip = new NetAddr::IP ($stop_ips[$count], '0.0.0.0') - 1;
-       $stop_ips[$count] = $new_naipstopip->addr();
+    my $all_ips_count = scalar(@all_ips);
+    my $exclude_ips_index;
+    if ($split_for_static_ip == 0) {
+        $exclude_ips_index = $all_ips_count - $exclude_ips_count;
     } else {
-       
-       my $naipsplit_stop = new NetAddr::IP ($excludeip, '0.0.0.0') - 1;
-       my $naipsplit_start = new NetAddr::IP ($excludeip, '0.0.0.0') + 1;
-       $stop_ips[$count] = $naipsplit_stop->addr();
-       $start_ips[$range_count+1] = $naipsplit_start->addr();
-       $stop_ips[$range_count+1] = $naipstopip->addr();
+        $exclude_ips_index = $all_ips_count - $split_for_static_ip;
     }
-   }
-  }
-  if ($exclude_not_in_ranges == 1 && $split_for_static_ip == 0) {
-      print STDOUT <<"EOM";
+    my $stop_ips_index = $exclude_ips_index/2;
+    my @start_ips;
+    my @stop_ips;
+    my @exclude_ips;
+
+    my $stop_count;
+    my $exclude_count;
+    my $exclude_not_in_ranges;
+
+    for my $temp_count (0 .. ($stop_ips_index-1)) {
+        $start_ips[$temp_count] = $all_ips[$temp_count];
+    }
+
+    for my $temp_count ($stop_ips_index .. ($exclude_ips_index-1)) {
+        $stop_ips[$stop_count] = $all_ips[$temp_count];
+        $stop_count = $stop_count + 1;
+    }
+
+    for my $temp_count ($exclude_ips_index .. ($all_ips_count-1)) {
+        $exclude_ips[$exclude_count] = $all_ips[$temp_count];
+        $exclude_count = $exclude_count + 1;
+    }
+
+    @exclude_ips = sort(@exclude_ips);
+    for my $excludeip (@exclude_ips) {
+
+        $exclude_not_in_ranges = 1;
+        my $naipexcludeip = new NetAddr::IP($excludeip);
+        my $range_count = scalar(@start_ips)-1;
+        my @zero_to_ranges = (0 .. $range_count);
+        for my $count (@zero_to_ranges) {
+
+            my $naipstartip = new NetAddr::IP($start_ips[$count]);
+            my $naipstopip = new NetAddr::IP($stop_ips[$count]);
+            if (($naipstartip <= $naipexcludeip) && ($naipexcludeip <= $naipstopip)) {
+                $exclude_not_in_ranges = 0;
+                if ($naipstartip == $naipexcludeip) {
+
+                    my $new_naipstartip = new NetAddr::IP($start_ips[$count], '0.0.0.0') + 1;
+
+                    # need to add prefix '/0' in the above statement as default for ip addresses: '/32'
+                    # does not work in constant addition operator this should work correctly as we
+                    # already make sure the start, stop and exclude ips are within the subnet
+                    $start_ips[$count] = $new_naipstartip->addr();
+                } elsif ($naipexcludeip == $naipstopip) {
+
+                    my $new_naipstopip = new NetAddr::IP($stop_ips[$count], '0.0.0.0') - 1;
+                    $stop_ips[$count] = $new_naipstopip->addr();
+                } else {
+
+                    my $naipsplit_stop = new NetAddr::IP($excludeip, '0.0.0.0') - 1;
+                    my $naipsplit_start = new NetAddr::IP($excludeip, '0.0.0.0') + 1;
+                    $stop_ips[$count] = $naipsplit_stop->addr();
+                    $start_ips[$range_count+1] = $naipsplit_start->addr();
+                    $stop_ips[$range_count+1] = $naipstopip->addr();
+                }
+            }
+        }
+        if ($exclude_not_in_ranges == 1 && $split_for_static_ip == 0) {
+            print STDOUT <<"EOM";
 DHCP server warning:
 exclude IP address '$excludeip' does not lie in any of the start-stop ranges    
 EOM
-  }
- }
+        }
+    }
 
- # this is done to eliminate incoorect ranges where start ip > stop ip after splitting
- # this would only happen when you're excluding an ip where
- # start ip = stop ip = exclude ip i.e. only 1 ip in range or
- # you're excluding stop ip and the ip before the stop ip has also been excluded
+    # this is done to eliminate incoorect ranges where start ip > stop ip after splitting
+    # this would only happen when you're excluding an ip where
+    # start ip = stop ip = exclude ip i.e. only 1 ip in range or
+    # you're excluding stop ip and the ip before the stop ip has also been excluded
 
- my $new_range_count = scalar(@start_ips)-1;
- my @new_ranges = (0 .. $new_range_count);
- my $tempcount = 0;
- my @new_start_ips;
- my @new_stop_ips;
- foreach my $rangecount (@new_ranges){
-     if ( ! ( new NetAddr::IP ($start_ips[$rangecount]) > new NetAddr::IP ($stop_ips[$rangecount]))){
-         $new_start_ips[$tempcount] = $start_ips[$rangecount];
-         $new_stop_ips[$tempcount] = $stop_ips[$rangecount];
-         $tempcount++;
-     }
- }
+    my $new_range_count = scalar(@start_ips)-1;
+    my @new_ranges = (0 .. $new_range_count);
+    my $tempcount = 0;
+    my @new_start_ips;
+    my @new_stop_ips;
+    foreach my $rangecount (@new_ranges){
+        if (!(new NetAddr::IP($start_ips[$rangecount]) > new NetAddr::IP($stop_ips[$rangecount]))) {
+            $new_start_ips[$tempcount] = $start_ips[$rangecount];
+            $new_stop_ips[$tempcount] = $stop_ips[$rangecount];
+            $tempcount++;
+        }
+    }
 
-if ($split_for_static_ip == 0) {
- if (@new_start_ips == 0){
-      print STDOUT <<"EOM";
+    if ($split_for_static_ip == 0) {
+        if (@new_start_ips == 0) {
+            print STDOUT <<"EOM";
 DHCP server error:
 Cannot exclude all IP addresses defined in start-stop ranges for a subnet
 EOM
-     exit 1;
- }
-}
+            exit 1;
+        }
+    }
 
- return (\@new_start_ips, \@new_stop_ips);
+    return (\@new_start_ips, \@new_stop_ips);
 }
 
