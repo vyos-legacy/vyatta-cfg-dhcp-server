@@ -48,6 +48,7 @@ my @names;
 my $disabled                          = 0;
 my $genout_initial_static_route_count = 0;
 my $genout_initial_wpad_count         = 0;
+my $disable_prefix = 0;
 
 my $vcDHCP = new Vyatta::Config();
 
@@ -87,6 +88,9 @@ EOM
     if (@global_params > 0) {
         $genout_initial .= "# The following ". scalar @global_params ." lines were added as global-parameters in the CLI and have not been validated\n";
         foreach my $line (@global_params) {
+            if ($line =~ /use-host-decl-names/) {
+                $disable_prefix = 1;
+            }
             my $decoded_line = decode_entities("$line");
             $genout_initial .= "$decoded_line\n";
         }
@@ -152,6 +156,9 @@ EOM
                 if (@shared_network_params > 0) {
                     $genout .= "# The following " . scalar @shared_network_params ." lines were added as shared-network-parameters in the CLI and have not been validated\n";
                     foreach my $line (@shared_network_params) {
+                        if ($line =~ /use-host-decl-names/) {
+                            $disable_prefix = 1;
+                        }
                         my $decoded_line = decode_entities("$line");
                         $genout .= "\t$decoded_line\n";
                     }
@@ -241,6 +248,9 @@ EOM
                         if (@subnet_params > 0) {
                             $genout .= "# The following " . scalar @subnet_params ." lines were added as subnet-parameters in the CLI and have not been validated\n";
                             foreach my $line (@subnet_params) {
+                                if ($line =~ /use-host-decl-names/) {
+                                    $disable_prefix = 1;
+                                }
                                 my $decoded_line = decode_entities("$line");
                                 $genout .= "\t\t$decoded_line\n";
                             }
@@ -686,9 +696,13 @@ under shared network name '$name'.
 EOM
                                 $error = 1;
                             }
-                            if (defined($ip_address) && $ip_address ne '' && defined($mac_address) && $mac_address ne '') {
-                                my $prefix = $name."_";
-                                $genout .= "\t\thost $prefix$static_mapping {\n";
+                            if (defined($ip_address) && $ip_address ne '' && defined($mac_address) && $mac_address ne '') {                                
+                                my $hostname_prefix = $name."_";
+                                if ($disable_prefix) {
+                                    $genout .= "\t\thost $static_mapping {\n";
+                                } else {
+                                    $genout .= "\t\thost $hostname_prefix$static_mapping {\n";
+                                }
                                 $genout .= "\t\t\tfixed-address $ip_address;\n";
                                 $genout .="\t\t\thardware ethernet $mac_address;\n";
                                 my @static_mapping_params = $vcDHCP->returnValues("$name subnet $subnet static-mapping $static_mapping static-mapping-parameters");
