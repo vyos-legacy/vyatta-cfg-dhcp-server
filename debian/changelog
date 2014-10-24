@@ -1,3 +1,12 @@
+vyatta-cfg-dhcp-server (0.12.36+vyos1+helium6) unstable; urgency=low
+
+  * vyatta-cfg-dhcp-server: formatting changes for style consistency
+  * vyatta-cfg-dhcp-server: formatting changes for style consistency
+  * vyatta-cfg-dhcp-server: formatting changes for style consistency
+  * vyatta-cfg-dhcp-server: don't prefix hostname with use-host-decl-names
+  
+ -- Alex Harpin <development@landsofshadow.co.uk> Fri, 24 Oct 2014 17:53:35 +0100
+
 vyatta-cfg-dhcp-server (0.12.36+vyos1+helium5) unstable; urgency=low
 
   [ Kim Hagen ]
