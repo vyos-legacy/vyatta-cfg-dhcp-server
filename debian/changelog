@@ -1,3 +1,9 @@
+vyatta-cfg-dhcp-server (0.12.36+vyos2+lithium1) unstable; urgency=low
+
+  * New branch
+
+ -- Alex Harpin <development@landsofshadow.co.uk>  Sun, 30 Nov 2014 22:28:25 +0000
+ 
 vyatta-cfg-dhcp-server (0.12.36+vyos1+helium6) unstable; urgency=low
 
   * vyatta-cfg-dhcp-server: formatting changes for style consistency
