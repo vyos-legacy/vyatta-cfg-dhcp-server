@@ -1,3 +1,9 @@
+vyatta-cfg-dhcp-server (0.12.36+vyos2+lithium2) unstable; urgency=low
+
+  * Force release
+
+ -- Alex Harpin <development@landsofshadow.co.uk>  Mon, 15 Dec 2014 18:20:17 +0000
+ 
 vyatta-cfg-dhcp-server (0.12.36+vyos2+lithium1) unstable; urgency=low
 
   * New branch
