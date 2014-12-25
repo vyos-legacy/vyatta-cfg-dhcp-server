@@ -1,7 +1,7 @@
 Source: vyatta-cfg-dhcp-server
 Section: contrib/net
 Priority: extra
-Maintainer: Vyatta Package Maintainers <maintainers@vyatta.com>
+Maintainer: VyOS Package Maintainers <maintainers@vyos.net>
 Build-Depends: debhelper (>= 5), autotools-dev
 Standards-Version: 3.7.2
 
@@ -26,5 +26,5 @@ Suggests: util-linux (>= 2.13-5),
  ethtool,
  ncurses-bin (>= 5.5-5),
  ntpdate
-Description: Vyatta DHCP-server-level configuration templates and scripts
- Vyatta DHCP-server-level CLI configuration templates and scripts.
+Description: VyOS DHCP-server-level configuration templates and scripts
+ VyOS DHCP-server-level CLI configuration templates and scripts.
