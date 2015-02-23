@@ -60,6 +60,60 @@ GetOptions(
 $vcDHCP->setLevel('service dhcp-server');
 if ($vcDHCP->exists('.')) {
 
+    my $hostfile_val = $vcDHCP->returnValue('hostfile-update');
+    if (defined $hostfile_val and $hostfile_val eq 'enable') {
+        # hooks to call to update /etc/hosts
+        $genout_initial .= "on commit {\n";
+        $genout_initial .= "\tset ClientName = ";
+        $genout_initial .= "pick-first-value(host-decl-name, ";
+        $genout_initial .= "option fqdn.hostname, option host-name);\n";
+        $genout_initial .= "\tset ClientIp = binary-to-ascii(10, 8, \".\", ";
+        $genout_initial .= "leased-address);\n";
+        $genout_initial .= "\tset ClientMac = binary-to-ascii(16, 8, \":\", ";
+        $genout_initial .= "substring(hardware, 1, 6));\n";
+        $genout_initial .= "\tset ClientDomain = pick-first-value(";
+        $genout_initial .= "config-option domain-name, \"..YYZ!\");\n";
+        $genout_initial .= "\texecute(\"/opt/vyatta/sbin/on-dhcp-event.sh\", ";
+        $genout_initial .= "\"commit\", ClientName, ClientIp, ClientMac, ";
+        $genout_initial .= "ClientDomain);\n";
+        $genout_initial .= "}\n\n";
+        $genout_initial .= "on release {\n";
+        $genout_initial .= "\tset ClientName = ";
+        $genout_initial .= "pick-first-value(host-decl-name, ";
+        $genout_initial .= "option fqdn.hostname, option host-name);\n";
+        $genout_initial .= "\tset ClientIp = binary-to-ascii(10, 8, \".\",";
+        $genout_initial .= "leased-address);\n";
+        $genout_initial .= "\tset ClientMac = binary-to-ascii(16, 8, \":\",";
+        $genout_initial .= "substring(hardware, 1, 6));\n";
+        $genout_initial .= "\tset ClientDomain = pick-first-value(";
+        $genout_initial .= "config-option domain-name, \"..YYZ!\");\n";
+        $genout_initial .= "\texecute(\"/opt/vyatta/sbin/on-dhcp-event.sh\", ";
+        $genout_initial .= "\"release\", ClientName, ClientIp, ClientMac, ";
+        $genout_initial .= "ClientDomain);\n";
+        $genout_initial .= "}\n\n";
+        $genout_initial .= "on expiry {\n";
+        $genout_initial .= "\tset ClientName = ";
+        $genout_initial .= "pick-first-value(host-decl-name, ";
+        $genout_initial .= "option fqdn.hostname, option host-name);\n";
+        $genout_initial .= "\tset ClientIp = binary-to-ascii(10, 8, \".\",";
+        $genout_initial .= "leased-address);\n";
+        $genout_initial .= "\tset ClientMac = binary-to-ascii(16, 8, \":\",";
+        $genout_initial .= "substring(hardware, 1, 6));\n";
+        $genout_initial .= "\tset ClientDomain = pick-first-value(";
+        $genout_initial .= "config-option domain-name, \"..YYZ!\");\n";
+        $genout_initial .= "\texecute(\"/opt/vyatta/sbin/on-dhcp-event.sh\", ";
+        $genout_initial .= "\"release\", ClientName, ClientIp, ClientMac, ";
+        $genout_initial .= "ClientDomain);\n";
+        $genout_initial .= "}\n\n";
+
+    } else {
+        system("sudo sed -i '/ #on-dhcp-event /d' /etc/hosts");
+        my $cmd = "pid=`cat /var/run/dnsmasq/dnsmasq.pid 2> /dev/null`;";
+        $cmd .= "if [ -n \"\$pid\" ]; then sudo kill -SIGHUP \$pid; fi";
+        system($cmd);
+    }
+
+
     my $disabled_val = $vcDHCP->returnValue('disabled');
     if (defined($disabled_val) && $disabled_val eq 'true') {
         my $msg = <<"EOM";

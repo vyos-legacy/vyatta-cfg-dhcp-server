@@ -1,0 +1,8 @@
+type:  txt
+default:  "disable"
+help: Option to make DHCP server update /etc/host file per lease
+syntax:expression: ($VAR(@) == "disable" || $VAR(@) == "enable" ) ; \
+"Invalid keyword $VAR(@) for hostfile-update. Specify 'enable' or 'disable'"
+allowed: echo "enable disable"
+val_help: enable; Enable updating /etc/host file (default)
+val_help: disable; Disable updating /etc/host file

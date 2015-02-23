@@ -6,6 +6,7 @@ sbin_SCRIPTS += scripts/system/dhcpd-config.pl
 sbin_SCRIPTS += scripts/system/dhcpdv6-config.pl
 sbin_SCRIPTS += scripts/system/dhcpd.init
 sbin_SCRIPTS += scripts/system/dhcpdv6.init
+sbin_SCRIPTS += scripts/system/on-dhcp-event.sh
 
 curverdir = $(sysconfdir)/config-migrate/current
 curver_DATA = cfg-version/dhcp-server@4
