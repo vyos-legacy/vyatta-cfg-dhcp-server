@@ -1,3 +1,10 @@
+vyatta-cfg-dhcp-server (0.12.36+vyos2+lithium4) unstable; urgency=low
+
+  [ Brian Hart ]
+  * Bug #511: Add dynamic hostfile-updates
+
+ -- Alex Harpin <development@landsofshadow.co.uk>  Sat, 13 Jun 2015 10:06:05 +0100
+ 
 vyatta-cfg-dhcp-server (0.12.36+vyos2+lithium3) unstable; urgency=low
 
   * Update maintainer address
