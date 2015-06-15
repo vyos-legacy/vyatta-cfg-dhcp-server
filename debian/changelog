@@ -1,3 +1,9 @@
+vyatta-cfg-dhcp-server (0.12.36+vyos2+lithium5) unstable; urgency=low
+
+  * vyatta-cfg-dhcp-server: update dh_gencontrol with new development flag
+
+ -- Alex Harpin <development@landsofshadow.co.uk>  Mon, 15 Jun 2015 08:12:59 +0100
+ 
 vyatta-cfg-dhcp-server (0.12.36+vyos2+lithium4) unstable; urgency=low
 
   [ Brian Hart ]
