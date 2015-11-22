@@ -105,15 +105,13 @@ if ($vcDHCP->exists('.')) {
         $genout_initial .= "\"release\", ClientName, ClientIp, ClientMac, ";
         $genout_initial .= "ClientDomain);\n";
         $genout_initial .= "}\n\n";
-
     } else {
         system("sudo sed -i '/ #on-dhcp-event /d' /etc/hosts");
         my $cmd = "pid=`cat /var/run/dnsmasq/dnsmasq.pid 2> /dev/null`;";
         $cmd .= "if [ -n \"\$pid\" ]; then sudo kill -SIGHUP \$pid; fi";
         system($cmd);
     }
-
-
+    
     my $disabled_val = $vcDHCP->returnValue('disabled');
     if (defined($disabled_val) && $disabled_val eq 'true') {
         my $msg = <<"EOM";
@@ -198,7 +196,6 @@ At least one DHCP lease subnet must be configured for each shared network.
 EOM
                 $error = 1;
             } else {
-
                 my $authoritative = $vcDHCP->returnValue("$name authoritative");
                 if ($authoritative eq 'enable') {
                     $genout .= "\tauthoritative;\n";
@@ -227,20 +224,16 @@ EOM
                 }
 
                 foreach my $subnet (@subnets) {
-
                     my $naipNetwork = new NetAddr::IP("$subnet");
                     $all_subnets[$subnet_count] = $naipNetwork;
                     $subnet_count++;
 
                     if (defined($naipNetwork)) {
-
                         $totalSubnetsLeased++;
-
                         foreach my $address (@intf_ips) {
                             if (doCheckIfAddressPLInsideNetwork($address, $naipNetwork)){
                                 $totalSubnetsMatched++;
                             }
-
                         }
 
                         my $sub     = $naipNetwork->network()->addr();
@@ -670,9 +663,7 @@ EOM
                         my $mapping_cnt = 0;
                         foreach my $static_mapping (@static_mapping) {
                             my $mapping_disabled =$vcDHCP->exists("$name subnet $subnet static-mapping $static_mapping disable");
-
                             if (defined $mapping_disabled) {
-
                                 # remove disabled static-mapping from array
                                 delete $static_mapping[$mapping_cnt];
                             }
@@ -717,17 +708,13 @@ EOM
                                         }
                                     }
                                     if ($equals_exclude_ip == 0){
-
                                         # we are in part of code where we have checked that static-ip does not
                                         # match any exclude ip in this subnet, so split ranges to remove this
                                         # static IP from start-stop ranges configured for this subnet
-
                                         $split_for_static_ip = 1;
                                         my @static_ip = ($ip_address);
-
                                         # need to generate new ranges so empty previously stored ranges string
                                         $genout_ranges = "";
-
                                         my ($split_ranges_start_ref, $split_ranges_stop_ref) = split_ranges(@startips_after_split, @stopips_after_split, @static_ip);
                                         @startips_after_split = @$split_ranges_start_ref;
                                         @stopips_after_split = @$split_ranges_stop_ref;
@@ -776,12 +763,10 @@ EOM
 
                         $genout .= $genout_failover_start . $genout_ranges . $genout_failover_end;
                         $genout .= "\t}\n";
-
                         # if failover is configured then there needs to be a dynamic range or else
                         # dhcpd will exit with an error on reading dhcpd.conf
                         # check here that there is still a dynamic range present after splits
                         # for exclude IPs and static-mappings if failover configured for this subnet
-
                         if (!($genout_failover_start eq "")) {
                             if (@startips_after_split == 0) {
                                 print STDERR <<"EOM";
@@ -805,7 +790,6 @@ EOM
         my @zero_to_failover_subnets = (0 .. $failover_subnets);
         for my $failover (@zero_to_failover_subnets) {
             if ($failover_status_list[$failover] eq 'primary') {
-
                 # add stuff for primary DHCP server
                 $genout_failover .="failover peer \"$failover_name_list[$failover]\" {\n";
                 $genout_failover .= "primary;\n";
@@ -819,9 +803,7 @@ EOM
                 $genout_failover .= "mclt 1800;\n";
                 $genout_failover .= "split 128;\n";
                 $genout_failover .= "}\n";
-
             } elsif ($failover_status_list[$failover] eq 'secondary') {
-
                 # add stuff for secondary DHCP server
                 $genout_failover .="failover peer \"$failover_name_list[$failover]\" {\n";
                 $genout_failover .= "secondary;\n";
@@ -833,7 +815,6 @@ EOM
                 $genout_failover .= "max-unacked-updates 10;\n";
                 $genout_failover .= "load balance max seconds 3;\n";
                 $genout_failover .= "}\n";
-
             }
         }
     }
@@ -848,7 +829,6 @@ EOM
                     print STDERR "Conflicting subnet ranges: $all_subnets[$jloop] overlaps $all_subnets[$iloop]\n";
                     $error = 1;
                 }
-
             }
         }
     }
@@ -898,15 +878,12 @@ sub doCheckIfAddressPLInsideNetwork {
 
     my $naipSM = new NetAddr::IP($address);
     if (defined($naipSM)) {
-
         my $subnetIA = $naipSM->network()->addr();
         my $naipIA = new NetAddr::IP($subnetIA, $naipSM->masklen());
-
         if (defined($naipIA) && $naipNetwork->within($naipIA)) {
             return 1;
         }
     }
-
     return 0;
 }
 
@@ -926,9 +903,7 @@ sub converttohex {
         if ($i != 3) {
             $hex_string .= ":";
         }
-
     }
-
     return $hex_string;
 }
 
@@ -938,22 +913,16 @@ sub prefix_and_subnet {
     my $prefix_subnet_string = "";
 
     if ($prefix == 0) {
-
         # do nothing as this needs to be an empty string
-
     } elsif (($prefix >= 1) && ($prefix <= 8)) {
         $prefix_subnet_string = $hex_prefix . ":" . substr($subnet, 0, 3);
-
     } elsif (($prefix >= 9) && ($prefix <= 16)) {
         $prefix_subnet_string = $hex_prefix . ":" . substr($subnet, 0, 6);
-
     } elsif (($prefix >= 17) && ($prefix <= 24)) {
         $prefix_subnet_string = $hex_prefix . ":" . substr($subnet, 0, 9);
-
     } elsif (($prefix >= 25) && ($prefix <= 32)) {
         $prefix_subnet_string = $hex_prefix . ":" . $subnet . ":";
     }
-
     return $prefix_subnet_string;
 }
 
@@ -987,7 +956,7 @@ sub split_ranges {
     for my $temp_count (0 .. ($stop_ips_index-1)) {
         $start_ips[$temp_count] = $all_ips[$temp_count];
     }
-
+    
     for my $temp_count ($stop_ips_index .. ($exclude_ips_index-1)) {
         $stop_ips[$stop_count] = $all_ips[$temp_count];
         $stop_count = $stop_count + 1;
@@ -1006,25 +975,20 @@ sub split_ranges {
         my $range_count = scalar(@start_ips)-1;
         my @zero_to_ranges = (0 .. $range_count);
         for my $count (@zero_to_ranges) {
-
             my $naipstartip = new NetAddr::IP($start_ips[$count]);
             my $naipstopip = new NetAddr::IP($stop_ips[$count]);
             if (($naipstartip <= $naipexcludeip) && ($naipexcludeip <= $naipstopip)) {
                 $exclude_not_in_ranges = 0;
                 if ($naipstartip == $naipexcludeip) {
-
                     my $new_naipstartip = new NetAddr::IP($start_ips[$count], '0.0.0.0') + 1;
-
                     # need to add prefix '/0' in the above statement as default for ip addresses: '/32'
                     # does not work in constant addition operator this should work correctly as we
                     # already make sure the start, stop and exclude ips are within the subnet
                     $start_ips[$count] = $new_naipstartip->addr();
                 } elsif ($naipexcludeip == $naipstopip) {
-
                     my $new_naipstopip = new NetAddr::IP($stop_ips[$count], '0.0.0.0') - 1;
                     $stop_ips[$count] = $new_naipstopip->addr();
                 } else {
-
                     my $naipsplit_stop = new NetAddr::IP($excludeip, '0.0.0.0') - 1;
                     my $naipsplit_start = new NetAddr::IP($excludeip, '0.0.0.0') + 1;
                     $stop_ips[$count] = $naipsplit_stop->addr();
@@ -1051,7 +1015,7 @@ EOM
     my $tempcount = 0;
     my @new_start_ips;
     my @new_stop_ips;
-    foreach my $rangecount (@new_ranges){
+    foreach my $rangecount (@new_ranges) {
         if (!(new NetAddr::IP($start_ips[$rangecount]) > new NetAddr::IP($stop_ips[$rangecount]))) {
             $new_start_ips[$tempcount] = $start_ips[$rangecount];
             $new_stop_ips[$tempcount] = $stop_ips[$rangecount];
@@ -1068,7 +1032,5 @@ EOM
             exit 1;
         }
     }
-
     return (\@new_start_ips, \@new_stop_ips);
 }
-
