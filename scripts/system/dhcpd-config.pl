@@ -60,8 +60,7 @@ GetOptions(
 $vcDHCP->setLevel('service dhcp-server');
 if ($vcDHCP->exists('.')) {
 
-    my $hostfile_val = $vcDHCP->returnValue('hostfile-update');
-    if (defined $hostfile_val and $hostfile_val eq 'enable') {
+    if ($vcDHCP->exists('enable-hostfile-update')) {
         # hooks to call to update /etc/hosts
         $genout_initial .= "on commit {\n";
         $genout_initial .= "\tset ClientName = pick-first-value(host-decl-name, option fqdn.hostname, option host-name);\n";
