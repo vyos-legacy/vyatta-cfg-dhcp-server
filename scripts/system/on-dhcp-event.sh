@@ -34,35 +34,38 @@ case "$action" in
     commit) # add mapping for new lease
         echo "- new lease event, setting static mapping for host "\
          "$client_fqdn_name (MAC=$client_mac, IP=$client_ip)"
-        #
-        # grep fails miserably with \t in the search expression.
-        # In the following line one <Ctrl-V> <TAB> is used after $client_search_expr
-        # followed by a single space
-        grep -q " $client_search_expr	 #on-dhcp-event " $file
-        if [ $? == 0 ]; then
-            echo pattern found, removing
-            wc1=`cat $file | wc -l`
-            sudo sed -i "/ $client_search_expr\t #on-dhcp-event /d" $file
-            wc2=`cat $file | wc -l`
-            if [ "$wc1" -eq "$wc2" ]; then
-                echo No change
+        if ! [[ "$client_fqdn_name" =~ [[:space:]] ]]; then
+            # grep fails miserably with \t in the search expression.
+            # In the following line one <Ctrl-V> <TAB> is used after $client_search_expr
+            # followed by a single space
+            grep -q " $client_search_expr	 #on-dhcp-event " $file
+            if [ $? == 0 ]; then
+                echo pattern found, removing
+                wc1=`cat $file | wc -l`
+                sudo sed -i "/ $client_search_expr\t #on-dhcp-event /d" $file
+                wc2=`cat $file | wc -l`
+                if [ "$wc1" -eq "$wc2" ]; then
+                    echo No change
+                fi
+            else
+                echo pattern NOT found
             fi
-        else
-            echo pattern NOT found
-        fi
     
-        # check if hostname already exists (e.g. a static host mapping)
-        # if so don't overwrite
-        grep -q " $client_search_expr	 " $file
-        if [ $? == 0 ]; then
-            echo host $client_fqdn_name already exists, exiting
-            exit 1
-        fi
+            # check if hostname already exists (e.g. a static host mapping)
+            # if so don't overwrite
+            grep -q " $client_search_expr	 " $file
+            if [ $? == 0 ]; then
+                echo host $client_fqdn_name already exists, exiting
+                exit 1
+            fi
 
-        line="$client_ip\t $client_fqdn_name\t #on-dhcp-event $client_mac"
-        sudo sh -c "echo -e '$line' >> $file"
-        ((changes++))
-        echo Entry was added
+            line="$client_ip\t $client_fqdn_name\t #on-dhcp-event $client_mac"
+            sudo sh -c "echo -e '$line' >> $file"
+            ((changes++))
+            echo Entry was added
+        else
+            echo "Ignoring illegal hostname (contains spaces)"
+        fi
     ;;
 
     release) # delete mapping for released address
