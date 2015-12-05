@@ -174,6 +174,7 @@ sub push_list {
 
 my @push_arr = (
     [ "shared-network-name *", \&write_cf, "shared-network VAR-2 {\n" ],
+    [ "shared-network-name *", \&write_cf, "    set PoolName = \"VAR-2\";\n" ],
     [ "shared-network-name * subnet *", \&write_cf, "    subnet6 VAR-4 {\n" ],
     [ "shared-network-name * subnet * static-mapping *", \&write_cf, "        host VAR-6 {\n" ],
     [ "shared-network-name * subnet * address-range prefix *", \&write_cf, "        range6 VAR-7" ],

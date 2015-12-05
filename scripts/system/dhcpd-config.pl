@@ -165,6 +165,7 @@ EOM
             }
 
             $genout .= "shared-network $name {\n";
+	    $genout .= "\tset PoolName = \"$name\";\n";
 
             my @subnets = $vcDHCP->listNodes("$name subnet");
             if (@subnets == 0) {
