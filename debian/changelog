@@ -1,3 +1,9 @@
+vyatta-cfg-dhcp-server (0.12.36+vyos2+current1) unstable; urgency=medium
+
+  * New branch
+
+ -- Kim Hagen <kim.sidney@gmail.com>  Sun, 24 Jan 2016 14:59:48 -0500
+
 vyatta-cfg-dhcp-server (0.12.36+vyos2+lithium5) unstable; urgency=low
 
   * vyatta-cfg-dhcp-server: update dh_gencontrol with new development flag
