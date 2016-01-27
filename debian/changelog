@@ -1,3 +1,9 @@
+vyatta-cfg-dhcp-server (0.12.36+vyos2+current2) unstable; urgency=medium
+
+  * Use ISC DHCP rather than the vyatta version.
+
+ -- Daniil Baturin <daniil@baturin.org>  Wed, 27 Jan 2016 07:42:18 -0500
+
 vyatta-cfg-dhcp-server (0.12.36+vyos2+current1) unstable; urgency=medium
 
   * New branch
