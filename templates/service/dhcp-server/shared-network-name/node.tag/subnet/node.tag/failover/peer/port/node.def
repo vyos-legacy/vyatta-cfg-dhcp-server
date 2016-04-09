@@ -1,0 +1,3 @@
+type: txt 
+help: DHCP failover peer listening port
+val_help: u32:1-65535; Numbered port 
