@@ -1,2 +1,0 @@
-type: ipv4
-help: IP address for failover peer to connect [REQUIRED]
