@@ -1,3 +1,9 @@
+vyatta-cfg-dhcp-server (0.12.36+vyos2+current3) unstable; urgency=medium
+
+  * Some fixup on init script.
+
+ -- Mihail Vasilev <mick@corp.linkintel.ru>  Wed, 24 May 2017 16:37:00 +0300
+
 vyatta-cfg-dhcp-server (0.12.36+vyos2+current2) unstable; urgency=medium
 
   * Use ISC DHCP rather than the vyatta version.

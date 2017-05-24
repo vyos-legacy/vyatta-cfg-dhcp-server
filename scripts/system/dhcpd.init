@@ -14,7 +14,7 @@ start() {
 	fi
 
 	OUTPUT=`start-stop-daemon --start --make-pidfile --pidfile $PIDFILE -b --exec $DHCPD \
-	-- -f -pf /var/run/dhcpd-unused.pid -cf $CONFIGFILE -lf /config/dhcpd.leases 2>&1`
+	-- -f -pf $PIDFILE -cf $CONFIGFILE -lf /config/dhcpd.leases 2>&1`
 	PID=`cat $PIDFILE 2>/dev/null`
 	if [ ! -d "/proc/$PID" ]; then
 	  if [ "$OUTPUT" == "" ]; then
