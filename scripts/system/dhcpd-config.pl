@@ -49,6 +49,7 @@ my $disabled                          = 0;
 my $genout_initial_static_route_count = 0;
 my $genout_initial_wpad_count         = 0;
 my $disable_prefix = 0;
+my $default_dhcp_failover_port = 647;
 
 my $vcDHCP = new Vyatta::Config();
 
@@ -160,6 +161,8 @@ EOM
     my $failover_subnets = -1;
     my @failover_local_address_list;
     my @failover_peer_address_list;
+    my @failover_local_port_list;
+    my @failover_peer_port_list;
     my @failover_name_list;
     my @failover_status_list;
 
@@ -476,8 +479,10 @@ EOM
                         my $genout_failover_start = "";
                         my $genout_ranges = "";
                         my $write_failover_pool = "";
-                        my $failover_local_address = $vcDHCP->returnValue("$name subnet $subnet failover local-address");
-                        my $failover_peer_address = $vcDHCP->returnValue("$name subnet $subnet failover peer-address");
+                        my $failover_local_address = $vcDHCP->returnValue("$name subnet $subnet failover local address");
+						my $failover_local_port = $vcDHCP->returnValue("$name subnet $subnet failover local port");
+                        my $failover_peer_address = $vcDHCP->returnValue("$name subnet $subnet failover peer address");
+						my $failover_peer_port = $vcDHCP->returnValue("$name subnet $subnet failover peer port");
                         my $failover_name = $vcDHCP->returnValue("$name subnet $subnet failover name");
                         my $failover_status = $vcDHCP->returnValue("$name subnet $subnet failover status");
 
@@ -489,11 +494,19 @@ EOM
                                     last;
                                 }
                             }
+							if($failover_local_port eq '') {
+								$failover_local_port = $default_dhcp_failover_port;
+							}
+							if($failover_peer_port eq '') {
+								$failover_peer_port = $default_dhcp_failover_port;
+							}
                             if ($is_there == 0) {
                                 if (@ranges > 0) {
                                     $failover_subnets = $failover_subnets + 1;
                                     $failover_local_address_list[$failover_subnets] =$failover_local_address;
                                     $failover_peer_address_list[$failover_subnets] =$failover_peer_address;
+									$failover_local_port_list[$failover_subnets] =$failover_local_port;
+                                    $failover_peer_port_list[$failover_subnets] =$failover_peer_port;
                                     $failover_name_list[$failover_subnets] =$failover_name;
                                     $failover_status_list[$failover_subnets] =$failover_status;
                                     $write_failover_pool = "\t";
@@ -810,9 +823,9 @@ EOM
                 $genout_failover .="failover peer \"$failover_name_list[$failover]\" {\n";
                 $genout_failover .= "primary;\n";
                 $genout_failover .="address $failover_local_address_list[$failover];\n";
-                $genout_failover .= "port 520;\n";
+                $genout_failover .= "port $failover_local_port_list[$failover];\n";
                 $genout_failover .="peer address $failover_peer_address_list[$failover];\n";
-                $genout_failover .= "peer port 520;\n";
+                $genout_failover .= "peer port $failover_peer_port_list[$failover];\n";
                 $genout_failover .= "max-response-delay 30;\n";
                 $genout_failover .= "max-unacked-updates 10;\n";
                 $genout_failover .= "load balance max seconds 3;\n";
@@ -826,9 +839,9 @@ EOM
                 $genout_failover .="failover peer \"$failover_name_list[$failover]\" {\n";
                 $genout_failover .= "secondary;\n";
                 $genout_failover .="address $failover_local_address_list[$failover];\n";
-                $genout_failover .= "port 520;\n";
+                $genout_failover .= "port $failover_local_port_list[$failover];\n";
                 $genout_failover .="peer address $failover_peer_address_list[$failover];\n";
-                $genout_failover .= "peer port 520;\n";
+                $genout_failover .= "peer port $failover_peer_port_list[$failover];\n";
                 $genout_failover .= "max-response-delay 30;\n";
                 $genout_failover .= "max-unacked-updates 10;\n";
                 $genout_failover .= "load balance max seconds 3;\n";
