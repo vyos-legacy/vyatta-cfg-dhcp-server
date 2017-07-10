@@ -117,8 +117,7 @@ if ($vcDHCP->exists('.')) {
     my $disabled_val = $vcDHCP->returnValue('disabled');
     if (defined($disabled_val) && $disabled_val eq 'true') {
         my $msg = <<"EOM";
-Warning:  DHCP server will be deactivated because 
-'service dhcp-server disabled' is 'true'
+Warning:  DHCP server will be deactivated because 'service dhcp-server disabled' is 'true'
 EOM
         print STDERR $msg;
         $disabled = 1;
