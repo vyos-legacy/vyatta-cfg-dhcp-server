@@ -117,7 +117,7 @@ if ($vcDHCP->exists('.')) {
     my $disabled_val = $vcDHCP->returnValue('disabled');
     if (defined($disabled_val) && $disabled_val eq 'true') {
         my $msg = <<"EOM";
-Warning:  DHCP server will be deactivated because 
+Warning:  DHCP server will be deactivated because
 'service dhcp-server disabled' is 'true'
 EOM
         print STDERR $msg;
@@ -174,7 +174,7 @@ EOM
     @names = $vcDHCP->listNodes();
     if (@names == 0) {
         print STDERR <<"EOM";
-No DHCP shared networks configured. 
+No DHCP shared networks configured.
 At least one DHCP shared network must be configured.
 EOM
         $error = 1;
@@ -392,7 +392,7 @@ EOM
                             my $router_naip =new NetAddr::IP("$router_for_destination");
                             my $hex_router = converttohex($router_naip);
                             my $hex_route = $prefix_plus_subnet . $hex_router;
-                            
+
                             $genout .="\t\toption rfc3442-static-route $hex_route;\n";
                             $genout .="\t\toption windows-static-route $hex_route;\n";
                         } elsif ($destination_subnet eq '' && $router_for_destination eq '') {
@@ -563,7 +563,7 @@ EOM
                                     }
                                     if ($naipStop < $naipStart) {
                                         print STDERR <<"EOM";
-Stop DHCP lease IP '$stop' should be an address equal to or later 
+Stop DHCP lease IP '$stop' should be an address equal to or later
 than the Start DHCP lease IP '$start'
 EOM
                                         $error                = 1;
@@ -605,7 +605,7 @@ EOM
                                                 $error = 1;
                                             } elsif (($naip_conflict_start[$j] <=$naip_conflict_stop[$i]) and ($naip_conflict_stop[$i] <=$naip_conflict_stop[$j])) {
                                                 print STDERR <<"EOM";
-Conflicting DHCP lease ranges: Stop IP '$ranges_stop[$i]' 
+Conflicting DHCP lease ranges: Stop IP '$ranges_stop[$i]'
 lies in DHCP lease range '$ranges[$j]'-'$ranges_stop[$j]'.
 EOM
                                                 $error = 1;
@@ -629,7 +629,7 @@ EOM
                                         if (!$naipexcludeip->within($naipNetwork)) {
                                             my $naipexcludeip_addr = $naipexcludeip->addr();
                                             print STDERR <<"EOM";
-Exclude IP '$naipexcludeip_addr' is outside of the DHCP lease network 
+Exclude IP '$naipexcludeip_addr' is outside of the DHCP lease network
 '$subnet' under shared network '$name'.
 EOM
                                             $error = 1;
@@ -750,7 +750,7 @@ under shared network name '$name'.
 EOM
                                 $error = 1;
                             }
-                            if (defined($ip_address) && $ip_address ne '' && defined($mac_address) && $mac_address ne '') {                                
+                            if (defined($ip_address) && $ip_address ne '' && defined($mac_address) && $mac_address ne '') {
                                 my $hostname_prefix = $name."_";
                                 if ($disable_prefix) {
                                     $genout .= "\t\thost $static_mapping {\n";
@@ -785,9 +785,9 @@ EOM
                         if (!($genout_failover_start eq "")) {
                             if (@startips_after_split == 0) {
                                 print STDERR <<"EOM";
-DHCP server error: All IP addresses defined in start-stop ranges under 
-'shared-network-name $name subnet $subnet' have either been excluded 
-or assigned using 'static-mapping'. To configure DHCP failover there 
+DHCP server error: All IP addresses defined in start-stop ranges under
+'shared-network-name $name subnet $subnet' have either been excluded
+or assigned using 'static-mapping'. To configure DHCP failover there
 needs to be atleast one IP address that is to be assigned dynamically.
 EOM
                                 $error = 1;
@@ -807,31 +807,31 @@ EOM
             if ($failover_status_list[$failover] eq 'primary') {
 
                 # add stuff for primary DHCP server
-                $genout_failover .="failover peer \"$failover_name_list[$failover]\" {\n";
-                $genout_failover .= "primary;\n";
-                $genout_failover .="address $failover_local_address_list[$failover];\n";
-                $genout_failover .= "port 520;\n";
-                $genout_failover .="peer address $failover_peer_address_list[$failover];\n";
-                $genout_failover .= "peer port 520;\n";
-                $genout_failover .= "max-response-delay 30;\n";
-                $genout_failover .= "max-unacked-updates 10;\n";
-                $genout_failover .= "load balance max seconds 3;\n";
-                $genout_failover .= "mclt 1800;\n";
-                $genout_failover .= "split 128;\n";
+                $genout_failover .= "failover peer \"$failover_name_list[$failover]\" {\n";
+                $genout_failover .= "\tprimary;\n";
+                $genout_failover .= "\taddress $failover_local_address_list[$failover];\n";
+                $genout_failover .= "\tport 520;\n";
+                $genout_failover .= "\tpeer address $failover_peer_address_list[$failover];\n";
+                $genout_failover .= "\tpeer port 520;\n";
+                $genout_failover .= "\tmax-response-delay 30;\n";
+                $genout_failover .= "\tmax-unacked-updates 10;\n";
+                $genout_failover .= "\tload balance max seconds 3;\n";
+                $genout_failover .= "\tmclt 1800;\n";
+                $genout_failover .= "\tsplit 128;\n";
                 $genout_failover .= "}\n";
 
             } elsif ($failover_status_list[$failover] eq 'secondary') {
 
                 # add stuff for secondary DHCP server
-                $genout_failover .="failover peer \"$failover_name_list[$failover]\" {\n";
-                $genout_failover .= "secondary;\n";
-                $genout_failover .="address $failover_local_address_list[$failover];\n";
-                $genout_failover .= "port 520;\n";
-                $genout_failover .="peer address $failover_peer_address_list[$failover];\n";
-                $genout_failover .= "peer port 520;\n";
-                $genout_failover .= "max-response-delay 30;\n";
-                $genout_failover .= "max-unacked-updates 10;\n";
-                $genout_failover .= "load balance max seconds 3;\n";
+                $genout_failover .= "failover peer \"$failover_name_list[$failover]\" {\n";
+                $genout_failover .= "\tsecondary;\n";
+                $genout_failover .= "\taddress $failover_local_address_list[$failover];\n";
+                $genout_failover .= "\tport 520;\n";
+                $genout_failover .= "\tpeer address $failover_peer_address_list[$failover];\n";
+                $genout_failover .= "\tpeer port 520;\n";
+                $genout_failover .= "\tmax-response-delay 30;\n";
+                $genout_failover .= "\tmax-unacked-updates 10;\n";
+                $genout_failover .= "\tload balance max seconds 3;\n";
                 $genout_failover .= "}\n";
 
             }
@@ -1036,7 +1036,7 @@ sub split_ranges {
         if ($exclude_not_in_ranges == 1 && $split_for_static_ip == 0) {
             print STDOUT <<"EOM";
 DHCP server warning:
-exclude IP address '$excludeip' does not lie in any of the start-stop ranges    
+exclude IP address '$excludeip' does not lie in any of the start-stop ranges
 EOM
         }
     }
