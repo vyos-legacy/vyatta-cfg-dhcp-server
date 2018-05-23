@@ -86,9 +86,9 @@ esac
 
 if [ $changes -gt 0 ]; then
   echo Success
-  pid=`cat /var/run/dnsmasq/dnsmasq.pid`
+  pid=`pgrep pdns_recursor`
   if [ -n "$pid" ]; then
-     sudo kill -SIGHUP $pid
+     sudo rec_control reload-zones
   fi
 else
   echo No changes made
