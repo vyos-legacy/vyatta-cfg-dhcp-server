@@ -1,3 +1,27 @@
+vyatta-cfg-dhcp-server (0.12.36+vyos2+lithium7) unstable; urgency=medium
+
+  * Sync with current.
+
+ -- Daniil Baturin <daniil@baturin.org>  Sun, 24 Jun 2018 12:05:34 +0200
+
+vyatta-cfg-dhcp-server (0.12.36+vyos2+current3) unstable; urgency=medium
+
+  * Some fixup on init script.
+
+ -- Mihail Vasilev <mick@corp.linkintel.ru>  Wed, 24 May 2017 16:37:00 +0300
+
+vyatta-cfg-dhcp-server (0.12.36+vyos2+current2) unstable; urgency=medium
+
+  * Use ISC DHCP rather than the vyatta version.
+
+ -- Daniil Baturin <daniil@baturin.org>  Wed, 27 Jan 2016 07:42:18 -0500
+
+vyatta-cfg-dhcp-server (0.12.36+vyos2+current1) unstable; urgency=medium
+
+  * New branch
+
+ -- Kim Hagen <kim.sidney@gmail.com>  Sun, 24 Jan 2016 14:59:48 -0500
+
 vyatta-cfg-dhcp-server (0.12.36+vyos2+lithium6) unstable; urgency=low
 
   [ Alex Harpin ]

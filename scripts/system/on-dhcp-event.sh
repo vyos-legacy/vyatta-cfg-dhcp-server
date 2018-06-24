@@ -88,11 +88,11 @@ case "$action" in
 esac
 
 if [ $changes -gt 0 ]; then
-    echo Success
-    pid=`cat /var/run/dnsmasq/dnsmasq.pid`
-    if [ -n "$pid" ]; then
-        sudo kill -SIGHUP $pid
-    fi
+  echo Success
+  pid=`pgrep pdns_recursor`
+  if [ -n "$pid" ]; then
+     sudo rec_control reload-zones
+  fi
 else
     echo No changes made
 fi
