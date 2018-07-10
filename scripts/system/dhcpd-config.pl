@@ -189,8 +189,6 @@ EOM
             }
 
             $genout .= "shared-network $name {\n";
-	    # quick hack for T726
-	    $genout .= "\ton commit { set shared-networkname = \"$name\";}\n";
 
             my @subnets = $vcDHCP->listNodes("$name subnet");
             if (@subnets == 0) {
@@ -778,6 +776,8 @@ EOM
 
                         $genout .= $genout_failover_start . $genout_ranges . $genout_failover_end;
                         $genout .= "\t}\n";
+			# quick hack for T726
+            		$genout .= "\ton commit { set shared-networkname = \"$name\";}\n";
 
                         # if failover is configured then there needs to be a dynamic range or else
                         # dhcpd will exit with an error on reading dhcpd.conf
