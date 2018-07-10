@@ -189,6 +189,8 @@ EOM
             }
 
             $genout .= "shared-network $name {\n";
+	    # quick hack for T726
+	    $genout .= "\ton commit { set shared-networkname = \"$name\";}\n";
 
             my @subnets = $vcDHCP->listNodes("$name subnet");
             if (@subnets == 0) {
