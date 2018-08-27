@@ -1,3 +1,0 @@
-type: txt
-help: Offset of the client's subnet in seconds from Coordinated Universal Time (UTC)
-syntax:expression: pattern $VAR(@) "^-?[0-9]+$" ; "invalid time offset value \"$VAR(@)\""

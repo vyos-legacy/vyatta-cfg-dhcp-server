@@ -1,3 +1,0 @@
-type: bool
-default: false
-help: Option to set IP forwarding (default: false)

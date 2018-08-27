@@ -1,4 +1,0 @@
-tag:
-type: txt
-help: Static mapping for specified address type
-syntax:expression: pattern $VAR(@) "^[-_a-zA-Z0-9.]+$" ; "invalid static-mapping name \"$VAR(@)\""

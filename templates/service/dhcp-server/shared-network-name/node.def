@@ -1,4 +1,0 @@
-tag:
-type: txt
-help: DHCP shared network [REQUIRED]
-syntax:expression: pattern $VAR(@) "^[-_a-zA-Z0-9.]+$" ; "invalid DHCP pool name \"$VAR(@)\""

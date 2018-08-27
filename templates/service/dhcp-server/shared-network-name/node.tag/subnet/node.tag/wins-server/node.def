@@ -1,3 +1,0 @@
-multi:
-type:  ipv4
-help: IP address for Windows Internet Name Service (WINS) server

@@ -1,6 +1,0 @@
-type:  txt
-default:  "disable"
-help: Option to make DHCP server authoritative for this physical network
-allowed: echo "enable disable"
-syntax:expression: ($VAR(@) == "disable" || $VAR(@) == "enable" ) ; \
-"Invalid keyword $VAR(@) for authoritative. Specify 'enable' or 'disable'"
