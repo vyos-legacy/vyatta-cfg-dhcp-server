@@ -1,3 +1,0 @@
-priority: 911
-end:expression: "sudo /opt/vyatta/sbin/dhcpd-config.pl --out=/opt/vyatta/etc/dhcpd.conf --init='/opt/vyatta/sbin/dhcpd.init' 1>&2"
-help: Dynamic Host Configuration Protocol (DHCP) for DHCP server

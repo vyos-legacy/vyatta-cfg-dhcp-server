@@ -1,2 +1,0 @@
-type:  ipv4
-help: Stopping IP address for DHCP lease range [REQUIRED]

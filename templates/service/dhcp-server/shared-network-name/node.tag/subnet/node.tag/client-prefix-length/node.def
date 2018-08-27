@@ -1,3 +1,0 @@
-type:  u32
-help: DHCP client prefix length
-syntax:expression: ($VAR(@) >= 0 && $VAR(@) <= 32) ; "DHCP client prefix length must be 0 to 32"

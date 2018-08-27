@@ -1,3 +1,0 @@
-multi:
-type: ipv4
-help: IP address that needs to be excluded from DHCP lease range
