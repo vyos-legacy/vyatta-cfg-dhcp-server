@@ -1,12 +1,7 @@
 cfgdir		 = $(datadir)/vyatta-cfg/templates
 
-sbin_SCRIPTS =
-
-sbin_SCRIPTS += scripts/system/dhcpdv6-config.pl
+sbin_SCRIPTS = scripts/system/dhcpdv6-config.pl
 sbin_SCRIPTS += scripts/system/dhcpdv6.init
-
-curverdir = $(sysconfdir)/config-migrate/current
-curver_DATA = cfg-version/dhcp-server@5
 
 cpiop = find  . ! -regex '\(.*~\|.*\.bak\|.*\.swp\|.*\#.*\#\)' -print0 | cpio -0pd
 
